@@ -1,14 +1,16 @@
 'use client'
 import React from "react";
 import { motion } from "framer-motion";
+import SocialIcons from "./SocialIcons";
 
 export const Welcome = () => {
   return (
-    <section className="grid place-content-center gap-2 bg-black px-8 py-24 h-screen text-white">
+    <section id="Home" className=" grid place-content-center gap-4 bg-black h-[100vh]  text-white relative">
       <FlipLink href="#">Heyy!</FlipLink>
       <FlipLink href="#">I&apos;am</FlipLink>
       <FlipLink href="#">Rahul*kumar</FlipLink>
       <FlipLink href="#">Web*Developer</FlipLink>
+    <SocialIcons/>
     </section>
   );
 };
@@ -22,7 +24,7 @@ const FlipLink = ({ children, href }: { children: string; href: string }) => {
       initial="initial"
       whileHover="hovered"
       href={href}
-      className="relative block overflow-hidden whitespace-nowrap text-4xl font-black uppercase sm:text-7xl md:text-8xl lg:text-9xl"
+      className="relative block overflow-hidden whitespace-nowrap text-4xl font-black uppercase sm:text-6xl md:text-7xl lg:text-8xl"
       style={{
         lineHeight: 0.75,
       }}

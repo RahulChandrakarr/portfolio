@@ -1,26 +1,31 @@
-"use client"
+"use client";
 import React, { MouseEvent } from "react";
-import {
-  SiAdobe,
-  SiApple,
-  SiFacebook,
-  SiGoogle,
-  SiLinkedin,
-  SiShopify,
-  SiSoundcloud,
-  SiSpotify,
-  SiTiktok,
-} from "react-icons/si";
 import { useAnimate } from "framer-motion";
+import {
+  SiHtml5,
+  SiCss3,
+  SiJavascript,
+  SiBootstrap,
+  SiReact,
+  SiNextdotjs,
+  SiTailwindcss,
+  SiNodedotjs,
+  SiExpress,
+  SiMongodb,
+  SiFirebase,
+  SiShopify,
+  SiWordpress,
+  SiFigma,
+} from "react-icons/si";
 import { IconType } from "react-icons";
 
 export const Technologies = () => {
   return (
-    <div className="bg-black px-4 py-12">
-      <div className="text">
-      </div>
+    <div className="bg-black h-screen">
       <div className="mx-auto max-w-7xl">
-        <h3 className="text-white font-semibold text-4xl my-8 rotate-12 ">TECHNOLOGIES I USE</h3>
+        <h3 className="text-white font-semibold text-4xl my-8">
+          TECHNOLOGIES I USE
+        </h3>
         <ClipPathLinks />
       </div>
     </div>
@@ -30,20 +35,27 @@ export const Technologies = () => {
 const ClipPathLinks = () => {
   return (
     <div className="divide-y divide-neutral-900 border border-neutral-900">
-      <div className="grid grid-cols-2 divide-x divide-neutral-900">
-        <LinkBox Icon={SiGoogle} href="#" />
+      <div className="grid grid-cols-5 divide-x divide-neutral-900">
+        <LinkBox Icon={SiHtml5} href="#" />
+        <LinkBox Icon={SiCss3} href="#" />
+        <LinkBox Icon={SiJavascript} href="#" />
+        <LinkBox Icon={SiBootstrap} href="#" />
+        <LinkBox Icon={SiReact} href="#" />
+      </div>
+      <div className="grid grid-cols-6 divide-x divide-neutral-900">
+        <LinkBox Icon={SiNextdotjs} href="#" />
+        <LinkBox Icon={SiTailwindcss} href="#" />
+        <LinkBox Icon={SiNodedotjs} href="#" />
+        <LinkBox Icon={SiExpress} href="#" />
+        <LinkBox Icon={SiMongodb} href="#" />
+        <LinkBox Icon={SiFirebase} href="#" />
+      </div>
+      <div className="grid grid-cols-5 divide-x divide-neutral-900">
         <LinkBox Icon={SiShopify} href="#" />
-      </div>
-      <div className="grid grid-cols-4 divide-x divide-neutral-900">
-        <LinkBox Icon={SiApple} href="#" />
-        <LinkBox Icon={SiSoundcloud} href="#" />
-        <LinkBox Icon={SiAdobe} href="#" />
-        <LinkBox Icon={SiFacebook} href="#" />
-      </div>
-      <div className="grid grid-cols-3 divide-x divide-neutral-900">
-        <LinkBox Icon={SiTiktok} href="#" />
-        <LinkBox Icon={SiSpotify} href="#" />
-        <LinkBox Icon={SiLinkedin} href="#" />
+        <LinkBox Icon={SiWordpress} href="#" />
+        <LinkBox Icon={SiFigma} href="#" />
+        <LinkBox Icon={CustomIcon} href="#" />
+        <LinkBox Icon={AnotherCustomIcon} href="#" />
       </div>
     </div>
   );
@@ -148,3 +160,7 @@ const LinkBox = ({ Icon, href }: { Icon: IconType; href: string }) => {
     </a>
   );
 };
+
+// Custom placeholder icons for Spline and Canva
+const CustomIcon = () => <span className="text-white text-xl">Spline</span>;
+const AnotherCustomIcon = () => <span className="text-white text-xl">Canva</span>;
