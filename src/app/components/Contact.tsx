@@ -24,7 +24,7 @@ export default function Contact() {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const { email, subject, message } = formData;
-    const mailtoLink = `mailto:support@example.com?subject=${encodeURIComponent(
+    const mailtoLink = `mailto:rrahulchandrakar1@gmail.com?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(`From: ${email}\n\n${message}`)}`;
     window.location.href = mailtoLink;
@@ -91,7 +91,7 @@ export default function Contact() {
               required
             ></textarea>
           </div>
-          <div className='flex flex-row items-center justify-between'>
+          <div className='flex flex-col items-center justify-between'>
             <div>
           <button
             type="submit"

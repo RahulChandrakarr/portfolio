@@ -16,6 +16,8 @@ import {
   SiShopify,
   SiWordpress,
   SiFigma,
+  SiCanva,
+
 } from "react-icons/si";
 import { IconType } from "react-icons";
 
@@ -36,27 +38,27 @@ const ClipPathLinks = () => {
   return (
     <div className="divide-y divide-neutral-900 border border-neutral-900">
       <div className="grid grid-cols-5 divide-x divide-neutral-900">
-        <LinkBox Icon={SiHtml5} href="#" />
-        <LinkBox Icon={SiCss3} href="#" />
-        <LinkBox Icon={SiJavascript} href="#" />
-        <LinkBox Icon={SiBootstrap} href="#" />
-        <LinkBox Icon={SiReact} href="#" />
+        <LinkBox Icon={SiHtml5} href="https://developer.mozilla.org/en-US/docs/Web/HTML" />
+        <LinkBox Icon={SiCss3} href="https://developer.mozilla.org/en-US/docs/Web/CSS" />
+        <LinkBox Icon={SiJavascript} href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" />
+        <LinkBox Icon={SiBootstrap} href="https://getbootstrap.com/docs/" />
+        <LinkBox Icon={SiReact} href="https://react.dev/" />
       </div>
       <div className="grid grid-cols-6 divide-x divide-neutral-900">
-        <LinkBox Icon={SiNextdotjs} href="#" />
-        <LinkBox Icon={SiTailwindcss} href="#" />
-        <LinkBox Icon={SiNodedotjs} href="#" />
-        <LinkBox Icon={SiExpress} href="#" />
-        <LinkBox Icon={SiMongodb} href="#" />
-        <LinkBox Icon={SiFirebase} href="#" />
+        <LinkBox Icon={SiNextdotjs} href="https://nextjs.org/docs" />
+        <LinkBox Icon={SiTailwindcss} href="https://tailwindcss.com/docs" />
+        <LinkBox Icon={SiNodedotjs} href="https://nodejs.org/en/docs" />
+        <LinkBox Icon={SiExpress} href="https://expressjs.com/" />
+        <LinkBox Icon={SiMongodb} href="https://www.mongodb.com/docs/" />
+        <LinkBox Icon={SiFirebase} href="https://firebase.google.com/docs" />
       </div>
       <div className="grid grid-cols-5 divide-x divide-neutral-900">
-        <LinkBox Icon={SiShopify} href="#" />
-        <LinkBox Icon={SiWordpress} href="#" />
-        <LinkBox Icon={SiFigma} href="#" />
-        <LinkBox Icon={CustomIcon} href="#" />
-        <LinkBox Icon={AnotherCustomIcon} href="#" />
+        <LinkBox Icon={SiShopify} href="https://shopify.dev/docs" />
+        <LinkBox Icon={SiWordpress} href="https://wordpress.org/support/article/wordpress-lessons/" />
+        <LinkBox Icon={SiFigma} href="https://help.figma.com/hc/en-us" />
+        <LinkBox Icon={SiCanva} href="https://www.canva.com/help/" />
       </div>
+
     </div>
   );
 };

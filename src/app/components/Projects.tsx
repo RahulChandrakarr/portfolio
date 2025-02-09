@@ -4,33 +4,22 @@ import ProjectCart from './ProjectCart';
 export default function Projects() {
   const projectsData = [
     {
-      image: '/project1.jpg',
-      heading: 'Project One',
-      description: 'This is the first project description.',
-      link: 'https://example.com/project1',
+      image: '/images/mind-match.png',
+      heading: 'Mind Match',
+      description: 'This survey is a Do It Yourself (DIY) assessment helping to understand how you could be seen by others based on your contextual behaviour patterns.',
+      link: 'https://mindmatch.co.in/home',
     },
     {
-      image: '/project2.jpg',
-      heading: 'Project Two',
-      description: 'This is the second project description.',
-      link: 'https://example.com/project2',
+      image: '/images/sunnstech.png',
+      heading: 'Sunnstech',
+      description: 'Software company in Chhattisgarh',
+      link: 'https://sunnstech.com/',
     },
-    {
-      image: '/project3.jpg',
-      heading: 'Project Three',
-      description: 'This is the third project description.',
-      link: 'https://example.com/project3',
-    },
-    {
-      image: '/project4.jpg',
-      heading: 'Project Four',
-      description: 'This is the fourth project description.',
-      link: 'https://example.com/project4',
-    },
+   
   ];
 
   return (
-    <div id='projects' className="relative flex flex-col gap-4 min-h-screen py-40 md:py-0">
+    <div id='projects' className="relative flex flex-col gap-4 min-h-screen py-40 ">
       <div className="headings mb-4">
         <h2 className="text-4xl font-serif font-semibold">Projects</h2>
       </div>

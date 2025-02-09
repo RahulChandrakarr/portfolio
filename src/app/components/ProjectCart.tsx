@@ -12,7 +12,7 @@ interface ProjectCartProps {
 
 const ProjectCart: React.FC<ProjectCartProps> = ({ image, heading, description, link }) => {
   return (
-    <div className="h-[480px] w-full group mx-auto dark:bg-[#252525] p-2 bg-white dark:border-0 border overflow-hidden rounded-md dark:text-white text-black">
+    <div className="h-[500px] w-full group mx-auto dark:bg-[#252525] p-2 bg-white dark:border-0 border overflow-hidden rounded-md dark:text-white text-black">
       <figure className="w-full h-80 group-hover:h-72 transition-all duration-300 dark:bg-[#0a121a] bg-[#f0f5fa] p-2 rounded-md relative overflow-hidden">
         <div
           style={{
@@ -30,14 +30,15 @@ const ProjectCart: React.FC<ProjectCartProps> = ({ image, heading, description, 
         />
       </figure>
       <article className="p-4 space-y-2">
-        <div className="h-8 w-20 bg-[#4393fc] rounded-md"></div>
+        {/* <div className="h-8 w-20 bg-[#4393fc] rounded-md"></div> */}
+        {/* <h1 className="text-xl font-semibold capitalize">{image}</h1> */}
         <h1 className="text-xl font-semibold capitalize">{heading}</h1>
         <p className="text-base leading-[120%]">{description}</p>
         <a
           href={link}
           className="text-base dark:text-white text-blue-600 font-normal group-hover:opacity-100 opacity-0 translate-y-2 group-hover:translate-y-0 pt-2 flex gap-1 transition-all duration-300"
         >
-          Learn more
+          visit site
           <span>
             <ChevronRight />
           </span>
