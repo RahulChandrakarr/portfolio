@@ -1,4 +1,5 @@
-import { faAddressBook, faFile, faGear, faHouse } from '@fortawesome/free-solid-svg-icons'
+import { faReact } from '@fortawesome/free-brands-svg-icons'
+import { faAddressBook, faFile, faGear, faHouse, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 import React from 'react'
@@ -12,9 +13,10 @@ export default function FlowtingNavbar() {
    <div>
     <ul className='flex flex-row items-center justify-center gap-10'>
        <Link href={'#home'}> <li> <FontAwesomeIcon icon={faHouse}  className='h-6 w-6'/></li></Link>
-        <li> <FontAwesomeIcon icon={faGear}  className='h-6 w-6'/></li>
-        <li> <FontAwesomeIcon icon={faFile}  className='h-6 w-6'/></li>
-        <li> <FontAwesomeIcon icon={faAddressBook}  className='h-6 w-6'/></li>
+       < Link href={'#intro'}> <li><FontAwesomeIcon icon={faUser} /></li></Link>
+       <Link href={'#projects'}><li> <FontAwesomeIcon icon={faFile}  className='h-6 w-6'/></li></Link>
+       <Link href={'#tech'}><li> <FontAwesomeIcon icon={faReact}  className='h-6 w-6'/></li></Link>
+       <Link href={'#contact'}><li> <FontAwesomeIcon icon={faAddressBook}  className='h-6 w-6'/></li></Link>
         </ul>
    </div>
 </div>
