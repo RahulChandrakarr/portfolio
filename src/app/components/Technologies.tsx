@@ -163,6 +163,4 @@ const LinkBox = ({ Icon, href }: { Icon: IconType; href: string }) => {
   );
 };
 
-// Custom placeholder icons for Spline and Canva
-const CustomIcon = () => <span className="text-white text-xl">Spline</span>;
-const AnotherCustomIcon = () => <span className="text-white text-xl">Canva</span>;
+// Custom placeholder icons for Spline and Canv
