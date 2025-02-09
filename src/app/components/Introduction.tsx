@@ -4,7 +4,7 @@ import { IntroCarts } from './IntroCarts'
 
 export default function Introduction() {
     return (
-        <div>
+        <div className='relative'>
             <div className='headings flex flex-col gap-2'>
                 <h1 className='text-4xl font-semibold font-serif'>Introduction</h1>
                 <h2 className='text-2xl'>Overview</h2>

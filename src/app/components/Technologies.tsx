@@ -21,7 +21,7 @@ import { IconType } from "react-icons";
 
 export const Technologies = () => {
   return (
-    <div className="bg-black h-screen">
+    <div className="bg-black py-40 md:h-screen ">
       <div className="mx-auto max-w-7xl">
         <h3 className="text-white font-semibold text-4xl my-8">
           TECHNOLOGIES I USE

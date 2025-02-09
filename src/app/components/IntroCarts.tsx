@@ -2,7 +2,7 @@ import { HoverEffect } from "./ui/CartHoverEffect";
 
 export function IntroCarts() {
   return (
-    <div className="max-w-5xl w-full mx-auto h-screen">
+    <div className="max-w-5xl w-full mx-auto ">
       <HoverEffect items={projects} />
     </div>
   );
