@@ -30,7 +30,7 @@ export default function Projects() {
   ];
 
   return (
-    <div className="relative flex flex-col gap-4 min-h-screen py-40 md:py-0 p-4">
+    <div className="relative flex flex-col gap-4 min-h-screen py-40 md:py-0">
       <div className="headings mb-4">
         <h2 className="text-4xl font-serif font-semibold">Projects</h2>
       </div>
