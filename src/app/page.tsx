@@ -5,7 +5,7 @@ import Introduction from "./components/Introduction";
 import Projects from "./components/Projects";
 import { Technologies } from "./components/Technologies";
 import { Welcome } from "./components/Welcome";
-import WelcomeForPhone from "./components/WelcomeForPhone";
+
 
 export default function Home() {
   return (
