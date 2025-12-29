@@ -5,28 +5,37 @@ import {
   SiHtml5,
   SiCss3,
   SiJavascript,
-  SiBootstrap,
+  SiTypescript,
   SiReact,
   SiNextdotjs,
+  SiBootstrap,
   SiTailwindcss,
+  SiRedux,
+  SiJquery,
   SiNodedotjs,
   SiExpress,
   SiMongodb,
+  SiPostgresql,
+  SiMysql,
   SiFirebase,
-  SiShopify,
-  SiWordpress,
+  SiSupabase,
+  SiGit,
+  SiGithub,
+  SiDocker,
+  SiPostman,
   SiFigma,
-  SiCanva,
-
+  SiGooglecloud,
+  SiNpm,
+  SiYarn
 } from "react-icons/si";
 import { IconType } from "react-icons";
 
 export const Technologies = () => {
   return (
-    <div id="tech" className="bg-black py-40 md:h-screen ">
+    <div id="tech" className="bg-black py-20">
       <div className="mx-auto max-w-7xl">
         <h3 className="text-white font-semibold text-4xl my-8">
-          TECHNOLOGIES I USE
+          TECHNICAL SKILLS
         </h3>
         <ClipPathLinks />
       </div>
@@ -37,28 +46,33 @@ export const Technologies = () => {
 const ClipPathLinks = () => {
   return (
     <div className="divide-y divide-neutral-900 border border-neutral-900">
-      <div className="grid grid-cols-5 divide-x divide-neutral-900">
-        <LinkBox Icon={SiHtml5} href="https://developer.mozilla.org/en-US/docs/Web/HTML" />
-        <LinkBox Icon={SiCss3} href="https://developer.mozilla.org/en-US/docs/Web/CSS" />
-        <LinkBox Icon={SiJavascript} href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" />
-        <LinkBox Icon={SiBootstrap} href="https://getbootstrap.com/docs/" />
-        <LinkBox Icon={SiReact} href="https://react.dev/" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 divide-x divide-neutral-900">
+        <LinkBox Icon={SiHtml5} href="#" />
+        <LinkBox Icon={SiCss3} href="#" />
+        <LinkBox Icon={SiJavascript} href="#" />
+        <LinkBox Icon={SiTypescript} href="#" />
+        <LinkBox Icon={SiReact} href="#" />
+        <LinkBox Icon={SiNextdotjs} href="#" />
+        <LinkBox Icon={SiBootstrap} href="#" />
+        <LinkBox Icon={SiTailwindcss} href="#" />
+        <LinkBox Icon={SiRedux} href="#" />
+        <LinkBox Icon={SiJquery} href="#" />
+        <LinkBox Icon={SiNodedotjs} href="#" />
+        <LinkBox Icon={SiExpress} href="#" />
+        <LinkBox Icon={SiMongodb} href="#" />
+        <LinkBox Icon={SiPostgresql} href="#" />
+        <LinkBox Icon={SiMysql} href="#" />
+        <LinkBox Icon={SiFirebase} href="#" />
+        <LinkBox Icon={SiSupabase} href="#" />
+        <LinkBox Icon={SiGit} href="#" />
+        <LinkBox Icon={SiGithub} href="#" />
+        <LinkBox Icon={SiDocker} href="#" />
+        <LinkBox Icon={SiPostman} href="#" />
+        <LinkBox Icon={SiFigma} href="#" />
+        <LinkBox Icon={SiGooglecloud} href="#" />
+        <LinkBox Icon={SiNpm} href="#" />
+        <LinkBox Icon={SiYarn} href="#" />
       </div>
-      <div className="grid grid-cols-6 divide-x divide-neutral-900">
-        <LinkBox Icon={SiNextdotjs} href="https://nextjs.org/docs" />
-        <LinkBox Icon={SiTailwindcss} href="https://tailwindcss.com/docs" />
-        <LinkBox Icon={SiNodedotjs} href="https://nodejs.org/en/docs" />
-        <LinkBox Icon={SiExpress} href="https://expressjs.com/" />
-        <LinkBox Icon={SiMongodb} href="https://www.mongodb.com/docs/" />
-        <LinkBox Icon={SiFirebase} href="https://firebase.google.com/docs" />
-      </div>
-      <div className="grid grid-cols-5 divide-x divide-neutral-900">
-        <LinkBox Icon={SiShopify} href="https://shopify.dev/docs" />
-        <LinkBox Icon={SiWordpress} href="https://wordpress.org/support/article/wordpress-lessons/" />
-        <LinkBox Icon={SiFigma} href="https://help.figma.com/hc/en-us" />
-        <LinkBox Icon={SiCanva} href="https://www.canva.com/help/" />
-      </div>
-
     </div>
   );
 };
@@ -148,7 +162,7 @@ const LinkBox = ({ Icon, href }: { Icon: IconType; href: string }) => {
       }}
       className="relative grid h-20 w-full place-content-center sm:h-28 md:h-36"
     >
-      <Icon className="text-xl sm:text-3xl lg:text-4xl" />
+      <Icon className="text-xl sm:text-3xl lg:text-4xl text-neutral-500" />
 
       <div
         ref={scope}
@@ -162,5 +176,3 @@ const LinkBox = ({ Icon, href }: { Icon: IconType; href: string }) => {
     </a>
   );
 };
-
-// Custom placeholder icons for Spline and Canv
