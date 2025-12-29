@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 
 // Define props interface
 interface ProjectCartProps {
@@ -10,7 +11,7 @@ interface ProjectCartProps {
   techStack?: string;
 }
 
-const ProjectCart: React.FC<ProjectCartProps> = ({ heading, description, link, techStack }) => {
+const ProjectCart: React.FC<ProjectCartProps> = ({ heading, description, link, techStack, image }) => {
   return (
     <div className="h-[550px] w-full group mx-auto dark:bg-[#252525] p-2 bg-white dark:border-0 border overflow-hidden rounded-md dark:text-white text-black flex flex-col">
       <figure className="w-full h-64 flex-shrink-0 group-hover:h-60 transition-all duration-300 dark:bg-[#0a121a] bg-[#f0f5fa] p-2 rounded-md relative overflow-hidden">
@@ -23,13 +24,11 @@ const ProjectCart: React.FC<ProjectCartProps> = ({ heading, description, link, t
         ></div>
 
         {/* Iframe for Live Preview */}
-        <iframe
-          src={link}
-          title={heading}
-          className="absolute top-0 left-0 w-full h-full rounded-lg border-0"
-          style={{ pointerEvents: 'none' }} // Disable interaction to keep card interactions
-          loading="lazy"
-          scrolling="no"
+        <Image
+          src={image}
+          alt={heading}
+          fill
+          className="object-cover rounded-lg"
         />
       </figure>
       <article className="p-4 flex flex-col flex-grow">

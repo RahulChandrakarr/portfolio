@@ -5,7 +5,7 @@ import { IntroCarts } from './IntroCarts'
 
 export default function Introduction() {
     return (
-        <section id='intro' className='relative py-20 bg-black'>
+        <section id='intro' className='relative  bg-black'>
             <div className="max-w-7xl mx-auto px-6">
                 <motion.div
                     initial="hidden"

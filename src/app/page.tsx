@@ -11,7 +11,7 @@ import { Welcome } from "./components/Welcome";
 
 export default function Home() {
   return (
-    <div className="px-6 bg-black ">
+    <div className="px-4 bg-black ">
 
       <div className="mx-auto">
         <Welcome />

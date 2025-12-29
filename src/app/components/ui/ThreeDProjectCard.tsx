@@ -4,6 +4,7 @@ import React from "react";
 import { CardBody, CardContainer, CardItem } from "./ThreeDCard";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 interface ProjectCartProps {
     image: string;
@@ -13,7 +14,7 @@ interface ProjectCartProps {
     techStack?: string;
 }
 
-export function ThreeDProjectCard({ heading, description, link, techStack }: ProjectCartProps) {
+export function ThreeDProjectCard({ heading, description, link, techStack, image }: ProjectCartProps) {
     return (
         <CardContainer className="inter-var w-full">
             <CardBody className="bg-gray-50 relative group/card  dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-[550px] rounded-xl p-6 border flex flex-col">
@@ -33,12 +34,11 @@ export function ThreeDProjectCard({ heading, description, link, techStack }: Pro
 
                 <CardItem translateZ="100" className="w-full mt-4 flex-grow relative">
                     <div className="w-full h-full rounded-xl group-hover/card:shadow-xl overflow-hidden relative">
-                        <iframe
-                            src={link}
-                            title={heading}
-                            className="absolute inset-0 w-full h-full border-0 pointer-events-none"
-                            loading="lazy"
-                            scrolling="no"
+                        <Image
+                            src={image}
+                            alt={heading}
+                            fill
+                            className="object-cover w-full h-full"
                         />
                         <div
                             style={{
