@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import React from "react";
 import { CardBody, CardContainer, CardItem } from "./ThreeDCard";
 import Link from "next/link";
@@ -14,7 +13,7 @@ interface ProjectCartProps {
     techStack?: string;
 }
 
-export function ThreeDProjectCard({ image, heading, description, link, techStack }: ProjectCartProps) {
+export function ThreeDProjectCard({ heading, description, link, techStack }: ProjectCartProps) {
     return (
         <CardContainer className="inter-var w-full">
             <CardBody className="bg-gray-50 relative group/card  dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-[550px] rounded-xl p-6 border flex flex-col">

@@ -57,7 +57,7 @@ export default function Introduction() {
                         >
                             <h3 className="text-xl font-semibold text-white mb-4">What I Do</h3>
                             <p>
-                                Currently, I serve as a Software Engineer at <strong>NJ Design Park</strong>, driving the development of enterprise-grade solutions. I thrive on solving complex problems—whether it's optimizing a review management system or containerizing applications with <strong>Docker</strong>.
+                                Currently, I serve as a Software Engineer at <strong>NJ Design Park</strong>, driving the development of enterprise-grade solutions. I thrive on solving complex problems—whether it&apos;s optimizing a review management system or containerizing applications with <strong>Docker</strong>.
                             </p>
                         </motion.div>
 

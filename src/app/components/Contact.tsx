@@ -45,10 +45,10 @@ export default function Contact() {
             className="flex-1 space-y-8"
           >
             <h2 className="text-4xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50">
-              Let's Connect
+              Let&apos;s Connect
             </h2>
             <p className="mt-4 font-normal text-base text-neutral-300 max-w-lg text-lg leading-relaxed">
-              Got a technical issue? Want to send feedback about a beta feature? Need details about our Business plan? Let us know. I'm always open to discussing new projects, creative ideas or opportunities to be part of your visions.
+              Got a technical issue? Want to send feedback about a beta feature? Need details about our Business plan? Let us know. I&apos;m always open to discussing new projects, creative ideas or opportunities to be part of your visions.
             </p>
 
             <div className="pt-8">

@@ -185,12 +185,8 @@ const LinkBox = ({ Icon, href }: { Icon: IconType; href: string }) => {
         show: { opacity: 1, scale: 1 }
       }}
       href={href}
-      onMouseEnter={(e: any) => {
-        handleMouseEnter(e);
-      }}
-      onMouseLeave={(e: any) => {
-        handleMouseLeave(e);
-      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className="relative grid h-20 w-full place-content-center sm:h-28 md:h-36"
     >
       <Icon className="text-xl sm:text-3xl lg:text-4xl text-neutral-500" />

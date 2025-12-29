@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import { ChevronRight } from 'lucide-react';
 
 // Define props interface
@@ -11,7 +10,7 @@ interface ProjectCartProps {
   techStack?: string;
 }
 
-const ProjectCart: React.FC<ProjectCartProps> = ({ image, heading, description, link, techStack }) => {
+const ProjectCart: React.FC<ProjectCartProps> = ({ heading, description, link, techStack }) => {
   return (
     <div className="h-[550px] w-full group mx-auto dark:bg-[#252525] p-2 bg-white dark:border-0 border overflow-hidden rounded-md dark:text-white text-black flex flex-col">
       <figure className="w-full h-64 flex-shrink-0 group-hover:h-60 transition-all duration-300 dark:bg-[#0a121a] bg-[#f0f5fa] p-2 rounded-md relative overflow-hidden">
