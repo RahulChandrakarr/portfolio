@@ -13,23 +13,42 @@ export const Welcome = () => {
       />
 
       <div className="p-4 max-w-7xl  mx-auto relative z-10  w-full pt-20 md:pt-0">
-        <div className="flex flex-col gap-4 justify-center items-center">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.2
+              }
+            }
+          }}
+          className="flex flex-col gap-4 justify-center items-center"
+        >
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            variants={{
+              hidden: { opacity: 0, y: 30 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+            }}
             className="text-center"
           >
             <h1 className="text-4xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50">
-              Hi <span className="inline-block hover:rotate-12 transition-transform duration-300">👋</span>, I&apos;m <br /> Rahul Kumar
+              Hi <motion.span
+                className="inline-block"
+                whileHover={{ rotate: 20, scale: 1.2 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >👋</motion.span>, I&apos;m <br /> Rahul Kumar
             </h1>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            variants={{
+              hidden: { opacity: 0, y: 30 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+            }}
             className="mt-4 font-normal text-base text-neutral-300 max-w-lg text-center mx-auto"
           >
             <p className="mb-4 text-lg md:text-xl text-blue-200 font-semibold">
@@ -41,24 +60,41 @@ export const Welcome = () => {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+            }}
             className="flex flex-col md:flex-row gap-4 mt-8 items-center"
           >
-            <a href="#projects" className="px-8 py-3 rounded-full bg-gradient-to-b from-blue-500 to-blue-600 text-white focus:ring-2 focus:ring-blue-400 hover:shadow-xl transition duration-200">
+            <motion.a
+              href="#projects"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-3 rounded-full bg-gradient-to-b from-blue-500 to-blue-600 text-white focus:ring-2 focus:ring-blue-400 hover:shadow-xl transition duration-200"
+            >
               View My Work
-            </a>
-            <a href="#contact" className="px-8 py-3 rounded-full border border-neutral-600 text-neutral-300 hover:bg-neutral-800 transition duration-200">
+            </motion.a>
+            <motion.a
+              href="#contact"
+              whileHover={{ scale: 1.05, backgroundColor: "rgba(38, 38, 38, 1)" }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-3 rounded-full border border-neutral-600 text-neutral-300 hover:bg-neutral-800 transition duration-200"
+            >
               Contact Me
-            </a>
+            </motion.a>
           </motion.div>
 
-          <div className="mt-10">
+          <motion.div
+            variants={{
+              hidden: { opacity: 0 },
+              visible: { opacity: 1, transition: { delay: 0.5, duration: 1 } }
+            }}
+            className="mt-10"
+          >
             <SocialIcons flex="row" position="relative" />
-          </div>
+          </motion.div>
 
-        </div>
+        </motion.div>
       </div>
 
     </section>
