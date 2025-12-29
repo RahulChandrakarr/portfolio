@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { motion } from 'framer-motion';
 import SocialIcons from './SocialIcons';
 
 export default function Contact() {
@@ -31,81 +32,104 @@ export default function Contact() {
   };
 
   return (
-    <section id='contact' className="">
-      <div className="h-screen px-4 mx-auto max-w-screen-md">
-        <h2 className="mb-4 text-4xl tracking-tight font-semibold">
-          Contact Us
-        </h2>
-        <p className="mb-8 lg:mb-16 font-light  sm:text-xl">
-          Got a technical issue? Want to send feedback about a beta feature? Need details about our Business plan? Let us know.
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div>
-            <label
-              htmlFor="email"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-            >
-              Your email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 dark:shadow-sm-light"
-              placeholder="name@example.com"
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="subject"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-            >
-              Subject
-            </label>
-            <input
-              type="text"
-              id="subject"
-              value={formData.subject}
-              onChange={handleChange}
-              className="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 dark:shadow-sm-light"
-              placeholder="Let us know how we can help you"
-              required
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label
-              htmlFor="message"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-400"
-            >
-              Your message
-            </label>
-            <textarea
-              id="message"
-              value={formData.message}
-              onChange={handleChange}
-              rows={6}
-              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg shadow-sm border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-              placeholder="Leave a comment..."
-              required
-            ></textarea>
-          </div>
-          <div className='flex flex-col items-center justify-between'>
-            <div>
-          <button
-            type="submit"
-            className="py-3 px-5 text-sm font-medium text-center border  text-white rounded-lg bg-primary-700 sm:w-fit hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-          >
-            Send message
-          </button>
-          </div>
-          <div>
+    <section id='contact' className="min-h-screen w-full rounded-md flex md:items-center md:justify-center bg-black/[0.96] antialiased bg-grid-white/[0.02] relative overflow-hidden">
+      <div className="p-4 max-w-7xl mx-auto w-full pt-20 md:pt-0 relative z-10">
+        <div className="flex flex-col md:flex-row gap-12 items-start justify-between">
 
-          <SocialIcons flex={"row"} position={"relative"}/>
-          </div>
-          </div>
-        </form>
+          {/* Left Content */}
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="flex-1 space-y-8"
+          >
+            <h2 className="text-4xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50">
+              Let's Connect
+            </h2>
+            <p className="mt-4 font-normal text-base text-neutral-300 max-w-lg text-lg leading-relaxed">
+              Got a technical issue? Want to send feedback about a beta feature? Need details about our Business plan? Let us know. I'm always open to discussing new projects, creative ideas or opportunities to be part of your visions.
+            </p>
+
+            <div className="pt-8">
+              <h3 className="text-xl font-semibold text-white mb-4">Find me on</h3>
+              <SocialIcons flex={"row"} position={"relative"} />
+            </div>
+          </motion.div>
+
+          {/* Right Form */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="flex-1 w-full bg-neutral-900/50 p-8 rounded-2xl border border-neutral-800 backdrop-blur-sm"
+          >
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-neutral-300 mb-2">
+                  Your Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg bg-neutral-950 border border-neutral-800 text-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-600 focus:border-transparent transition-all"
+                  placeholder="name@example.com"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="subject" className="block text-sm font-medium text-neutral-300 mb-2">
+                  Subject
+                </label>
+                <input
+                  type="text"
+                  id="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg bg-neutral-950 border border-neutral-800 text-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-600 focus:border-transparent transition-all"
+                  placeholder="Let us know how we can help you"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-neutral-300 mb-2">
+                  Message
+                </label>
+                <textarea
+                  id="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full px-4 py-3 rounded-lg bg-neutral-950 border border-neutral-800 text-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-600 focus:border-transparent transition-all resize-none"
+                  placeholder="Leave a comment..."
+                  required
+                ></textarea>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                className="w-full py-4 px-6 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition-colors duration-200 flex items-center justify-center gap-2 group"
+              >
+                Send Message
+                <svg
+                  className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </motion.button>
+            </form>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

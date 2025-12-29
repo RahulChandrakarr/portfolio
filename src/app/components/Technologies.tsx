@@ -1,6 +1,6 @@
 "use client";
 import React, { MouseEvent } from "react";
-import { useAnimate } from "framer-motion";
+import { useAnimate, motion } from "framer-motion";
 import {
   SiHtml5,
   SiCss3,
@@ -34,10 +34,23 @@ export const Technologies = () => {
   return (
     <div id="tech" className="bg-black py-20">
       <div className="mx-auto max-w-7xl">
-        <h3 className="text-white font-semibold text-4xl my-8">
+        <motion.h3
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          className="text-white font-semibold text-4xl my-8"
+        >
           TECHNICAL SKILLS
-        </h3>
-        <ClipPathLinks />
+        </motion.h3>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          viewport={{ once: true }}
+        >
+          <ClipPathLinks />
+        </motion.div>
       </div>
     </div>
   );
@@ -46,7 +59,21 @@ export const Technologies = () => {
 const ClipPathLinks = () => {
   return (
     <div className="divide-y divide-neutral-900 border border-neutral-900">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 divide-x divide-neutral-900">
+      <motion.div
+        variants={{
+          hidden: { opacity: 0 },
+          show: {
+            opacity: 1,
+            transition: {
+              staggerChildren: 0.05
+            }
+          }
+        }}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 divide-x divide-neutral-900"
+      >
         <LinkBox Icon={SiHtml5} href="#" />
         <LinkBox Icon={SiCss3} href="#" />
         <LinkBox Icon={SiJavascript} href="#" />
@@ -72,7 +99,7 @@ const ClipPathLinks = () => {
         <LinkBox Icon={SiGooglecloud} href="#" />
         <LinkBox Icon={SiNpm} href="#" />
         <LinkBox Icon={SiYarn} href="#" />
-      </div>
+      </motion.div>
     </div>
   );
 };
@@ -152,12 +179,16 @@ const LinkBox = ({ Icon, href }: { Icon: IconType; href: string }) => {
   };
 
   return (
-    <a
+    <motion.a
+      variants={{
+        hidden: { opacity: 0, scale: 0.8 },
+        show: { opacity: 1, scale: 1 }
+      }}
       href={href}
-      onMouseEnter={(e) => {
+      onMouseEnter={(e: any) => {
         handleMouseEnter(e);
       }}
-      onMouseLeave={(e) => {
+      onMouseLeave={(e: any) => {
         handleMouseLeave(e);
       }}
       className="relative grid h-20 w-full place-content-center sm:h-28 md:h-36"
@@ -173,6 +204,6 @@ const LinkBox = ({ Icon, href }: { Icon: IconType; href: string }) => {
       >
         <Icon className="text-xl sm:text-3xl md:text-4xl" />
       </div>
-    </a>
+    </motion.a>
   );
 };

@@ -1,5 +1,6 @@
 'use client'
 import React from 'react';
+import { motion } from 'framer-motion';
 import { ThreeDProjectCard } from './ui/ThreeDProjectCard';
 
 export default function Projects() {
@@ -64,13 +65,47 @@ export default function Projects() {
 
   return (
     <div id='projects' className="relative flex flex-col gap-4 min-h-screen py-20 bg-black">
-      <div className="headings mb-10 text-center">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        viewport={{ once: true }}
+        className="headings mb-10 text-center"
+      >
         <h2 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50">Featured Projects</h2>
         <p className="mt-4 text-neutral-400">Interact with the cards to view details</p>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto px-4 mt-10">
+      </motion.div>
+      <motion.div
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: {
+              staggerChildren: 0.2
+            }
+          }
+        }}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4 mt-10"
+      >
         {projectsData.map((project, index) => (
-          <div key={index} className="w-full h-auto">
+          <motion.div
+            key={index}
+            variants={{
+              hidden: { y: 50, opacity: 0 },
+              visible: {
+                y: 0,
+                opacity: 1,
+                transition: {
+                  duration: 0.5,
+                  ease: "easeOut"
+                }
+              }
+            }}
+            className="w-full h-auto"
+          >
             <ThreeDProjectCard
               image={project.image}
               heading={project.heading}
@@ -78,9 +113,9 @@ export default function Projects() {
               link={project.link}
               techStack={project.techStack}
             />
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }
