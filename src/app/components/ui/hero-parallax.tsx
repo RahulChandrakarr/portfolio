@@ -105,13 +105,21 @@ export const Header = () => {
   return (
     <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full  left-0 top-0">
       <h1 className="text-2xl md:text-7xl font-bold dark:text-white">
-        The Ultimate <br /> development studio
+        Hi <span className="inline-block hover:rotate-12 transition-transform duration-300">👋</span>, I&apos;m <br /> Rahul Kumar
       </h1>
       <p className="max-w-2xl text-base md:text-xl mt-8 dark:text-neutral-200">
-        We build beautiful products with the latest technologies and frameworks.
-        We are a team of passionate developers and designers that love to build
-        amazing products.
+        Full Stack Developer | MERN Stack Specialist
+        <br />
+        Building scalable, enterprise-grade web solutions. Currently specializing in Next.js, Cloud Architectures, and delivering premium user experiences.
       </p>
+      <div className="flex flex-col md:flex-row gap-4 mt-8 items-center justify-start">
+        <a href="#projects" className="px-8 py-3 rounded-full bg-gradient-to-b from-blue-500 to-blue-600 text-white focus:ring-2 focus:ring-blue-400 hover:shadow-xl transition duration-200 z-50">
+          View My Work
+        </a>
+        <a href="#contact" className="px-8 py-3 rounded-full border border-neutral-600 text-neutral-300 hover:bg-neutral-800 transition duration-200 z-50">
+          Contact Me
+        </a>
+      </div>
     </div>
   );
 };

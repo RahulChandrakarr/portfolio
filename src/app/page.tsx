@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <div className="px-6 bg-black ">
 
-      <div className="max-w-[900px] mx-auto">
+      <div className="mx-auto">
         <Welcome />
         <Introduction />
         <WorkExperience />

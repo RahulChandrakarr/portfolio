@@ -1,5 +1,6 @@
+'use client'
 import React from 'react';
-import ProjectCart from './ProjectCart';
+import { ThreeDProjectCard } from './ui/ThreeDProjectCard';
 
 export default function Projects() {
   const projectsData = [
@@ -62,20 +63,22 @@ export default function Projects() {
   ];
 
   return (
-    <div id='projects' className="relative flex flex-col gap-4 min-h-screen py-20 ">
-      <div className="headings mb-4">
-        <h2 className="text-4xl font-serif font-semibold">Featured Projects</h2>
+    <div id='projects' className="relative flex flex-col gap-4 min-h-screen py-20 bg-black">
+      <div className="headings mb-10 text-center">
+        <h2 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50">Featured Projects</h2>
+        <p className="mt-4 text-neutral-400">Interact with the cards to view details</p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2  gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto px-4 mt-10">
         {projectsData.map((project, index) => (
-          <ProjectCart
-            key={index}
-            image={project.image}
-            heading={project.heading}
-            description={project.description}
-            link={project.link}
-            techStack={project.techStack}
-          />
+          <div key={index} className="w-full h-auto">
+            <ThreeDProjectCard
+              image={project.image}
+              heading={project.heading}
+              description={project.description}
+              link={project.link}
+              techStack={project.techStack}
+            />
+          </div>
         ))}
       </div>
     </div>
