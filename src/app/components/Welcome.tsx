@@ -80,6 +80,6 @@ export const Welcome = () => {
       thumbnail: "/images/ska.png", // Reuse
     },
   ];
-
+      // Note: Some products are repeated to enhance the parallax effect
   return <HeroParallax products={products} />;
 };
