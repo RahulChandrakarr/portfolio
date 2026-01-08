@@ -8,7 +8,7 @@ import Projects from "./components/Projects";
 import { Technologies } from "./components/Technologies";
 import { Welcome } from "./components/Welcome";
 
-
+// heyy this is a test
 export default function Home() {
   return (
     <div className="px-4 bg-black ">
