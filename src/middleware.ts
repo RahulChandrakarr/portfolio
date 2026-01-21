@@ -10,12 +10,10 @@ const supabaseKey =
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
-  const supabase = createMiddlewareClient({
-    req,
-    res,
-    supabaseUrl,
-    supabaseKey,
-  });
+  const supabase = createMiddlewareClient(
+    { req, res },
+    { supabaseUrl, supabaseKey }
+  );
 
   const { data, error } = await supabase.auth.getSession();
   if (error) {
