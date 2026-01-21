@@ -167,6 +167,16 @@ export default function DocumentsTab({
                         Open
                       </button>
 
+                      {doc.signedUrl && (
+                        <a
+                          href={doc.signedUrl}
+                          download
+                          className="inline-flex w-full justify-center rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                        >
+                          Download
+                        </a>
+                      )}
+
                       <button
                         type="button"
                         className="flex h-8 w-12 items-center justify-center rounded border border-slate-300 text-[10px] font-semibold text-slate-600 hover:bg-slate-100"
