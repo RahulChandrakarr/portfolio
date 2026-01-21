@@ -1,8 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-
-type TabId = 'overview' | 'plans';
+import { useEffect, useMemo, useState } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import OverviewTab from './OverviewTab';
+import PlansTab from './PlansTab';
+import DocumentsTab from './DocumentsTab';
+import DocumentModal from './DocumentModal';
+import { DocumentWithUrl, TabId } from './types';
 
 const tabs: {
   id: TabId;
@@ -19,131 +23,249 @@ const tabs: {
     label: 'Plans',
     description: 'Upcoming milestones, timelines, and commitments.',
   },
+  {
+    id: 'documents',
+    label: 'My Documents',
+    description: 'Upload and manage PDFs or images stored securely.',
+  },
 ];
 
 export default function MyTasksLayout() {
+  const supabase = useMemo(() => createClientComponentClient(), []);
   const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [docs, setDocs] = useState<DocumentWithUrl[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [docError, setDocError] = useState<string | null>(null);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [search, setSearch] = useState('');
+  const [selectedDoc, setSelectedDoc] = useState<DocumentWithUrl | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
 
-  const content = useMemo(() => {
-    if (activeTab === 'overview') {
-      return (
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Overview
-              </p>
-              <h2 className="mt-2 text-xl font-semibold text-slate-900">
-                Current status
-              </h2>
-              <p className="mt-2 text-sm text-slate-600">
-                A quick snapshot of what is happening right now. Highlight key
-                metrics and blockers so you can act fast.
-              </p>
-            </div>
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-              Up to date
-            </span>
-          </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-800">Active tasks</p>
-              <p className="mt-1 text-2xl font-semibold text-slate-900">8</p>
-              <p className="text-xs text-slate-500">3 due this week</p>
-            </div>
-            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-800">
-                Completion rate
-              </p>
-              <p className="mt-1 text-2xl font-semibold text-slate-900">72%</p>
-              <p className="text-xs text-slate-500">+4% vs last sprint</p>
-            </div>
-          </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-800">
-                Recent highlights
-              </p>
-              <ul className="mt-2 space-y-1 text-sm text-slate-600">
-                <li>• Resolved onboarding blocker for new hires</li>
-                <li>• Closed 5 customer-reported issues</li>
-                <li>• Deployed analytics instrumentation</li>
-              </ul>
-            </div>
-            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-800">
-                Watch list / risks
-              </p>
-              <ul className="mt-2 space-y-1 text-sm text-slate-600">
-                <li>• API latency spike in EU region</li>
-                <li>• Pending dependency update for auth SDK</li>
-                <li>• UX polish needed on billing flow</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-      );
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: 'UTC',
+      }),
+    []
+  );
+
+  const formatBytes = (bytes: number) => {
+    if (!bytes) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    return `${(bytes / 1024 ** i).toFixed(1)} ${units[i]}`;
+  };
+
+  const fetchDocuments = async () => {
+    const { data, error } = await supabase
+      .from('documents')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) {
+      console.error('Fetch documents error', error);
+      setDocError(error.message);
+      return;
+    }
+    if (!data) {
+      setDocs([]);
+      return;
     }
 
-    return (
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-          Plans
-        </p>
-        <h2 className="mt-2 text-xl font-semibold text-slate-900">
-          What&apos;s next
-        </h2>
-        <p className="mt-2 text-sm text-slate-600">
-          Upcoming milestones and commitments. Link to specs, tickets, and docs
-          so you can jump in quickly.
-        </p>
-
-        <div className="mt-6 space-y-4">
-          {[
-            {
-              title: 'Finalize Q1 roadmap',
-              due: 'Due Friday',
-              status: 'On track',
-              description:
-                'Confirm scope with stakeholders, finalize estimates, and publish the milestone doc.',
-            },
-            {
-              title: 'Ship onboarding flow updates',
-              due: 'Due next week',
-              status: 'At risk',
-              description:
-                'Wrap validation fixes, add analytics events, and QA mobile edge cases.',
-            },
-            {
-              title: 'Retrospective & action items',
-              due: 'In 2 weeks',
-              status: 'Planned',
-              description:
-                'Schedule retro, collect metrics, and create follow-up tasks for the next sprint.',
-            },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="rounded-xl border border-slate-100 bg-slate-50 p-4"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-900">
-                    {item.title}
-                  </p>
-                  <p className="text-xs text-slate-500">{item.due}</p>
-                </div>
-                <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-700">
-                  {item.status}
-                </span>
-              </div>
-              <p className="mt-2 text-sm text-slate-600">{item.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+    const withUrls = await Promise.all(
+      data.map(async (doc) => {
+        const { data: signed, error: signedErr } = await supabase.storage
+          .from('my-docs')
+          .createSignedUrl(doc.file_path, 60 * 60);
+        if (signedErr) {
+          console.error('Signed URL error', signedErr);
+          return { ...doc };
+        }
+        return { ...doc, signedUrl: signed?.signedUrl };
+      })
     );
+
+    setDocs(withUrls);
+    setDocError(null);
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hash = window.location.hash.replace('#', '') as TabId;
+    if (hash && tabs.find((t) => t.id === hash)) {
+      setActiveTab(hash);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'documents') {
+      fetchDocuments();
+    }
   }, [activeTab]);
+
+  const handleTabChange = (tabId: TabId) => {
+    setActiveTab(tabId);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.hash = tabId;
+      window.history.replaceState(null, '', url.toString());
+    }
+  };
+
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!title.trim()) {
+      setDocError('Please add a title before uploading.');
+      return;
+    }
+    setDocError(null);
+    setUploading(true);
+
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData?.user) {
+      console.error('Supabase getUser error', userError);
+      setDocError(userError?.message || 'You must be signed in to upload.');
+      setUploading(false);
+      return;
+    }
+
+    const userId = userData.user.id;
+    const path = `${userId}/${Date.now()}-${file.name}`;
+
+    const { error: storageError } = await supabase.storage
+      .from('my-docs')
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type,
+      });
+
+    if (storageError) {
+      console.error('Storage upload error', storageError);
+      setDocError(storageError.message);
+      setUploading(false);
+      return;
+    }
+
+    const { error: insertError } = await supabase.from('documents').insert({
+      user_id: userId,
+      file_path: path,
+      file_name: file.name,
+      mime_type: file.type,
+      size: file.size,
+      title: title.trim(),
+      description: description.trim() || null,
+    });
+
+    if (insertError) {
+      console.error('Insert documents error', insertError);
+      setDocError(insertError.message);
+      setUploading(false);
+      return;
+    }
+
+    await fetchDocuments();
+    setTitle('');
+    setDescription('');
+    setUploading(false);
+  };
+
+  const filteredDocs = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return docs;
+    return docs.filter((d) => {
+      const haystack = [d.title, d.description, d.file_name, d.mime_type]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(term);
+    });
+  }, [search, docs]);
+
+  const openDocModal = (doc: DocumentWithUrl) => {
+    setSelectedDoc(doc);
+    setEditTitle(doc.title || doc.file_name);
+    setEditDescription(doc.description || '');
+  };
+
+  const closeDocModal = () => {
+    setSelectedDoc(null);
+    setEditTitle('');
+    setEditDescription('');
+  };
+
+  const handleUpdateDoc = async () => {
+    if (!selectedDoc) return;
+    if (!editTitle.trim()) {
+      setDocError('Title is required.');
+      return;
+    }
+    setDocError(null);
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData?.user) {
+      setDocError(userError?.message || 'You must be signed in to update.');
+      return;
+    }
+    const userId = userData.user.id;
+    const { error: updateError } = await supabase
+      .from('documents')
+      .update({
+        title: editTitle.trim(),
+        description: editDescription.trim() || null,
+      })
+      .eq('id', selectedDoc.id)
+      .eq('user_id', userId);
+
+    if (updateError) {
+      setDocError(updateError.message);
+      return;
+    }
+
+    setDocs((prev) =>
+      prev.map((d) =>
+        d.id === selectedDoc.id
+          ? { ...d, title: editTitle.trim(), description: editDescription.trim() || null }
+          : d
+      )
+    );
+    closeDocModal();
+  };
+
+  const content = useMemo(() => {
+    if (activeTab === 'overview') return <OverviewTab />;
+    if (activeTab === 'plans') return <PlansTab />;
+    return (
+      <DocumentsTab
+        title={title}
+        description={description}
+        search={search}
+        uploading={uploading}
+        docError={docError}
+        filteredDocs={filteredDocs}
+        onTitleChange={setTitle}
+        onDescriptionChange={setDescription}
+        onSearchChange={setSearch}
+        onUpload={handleUpload}
+        onOpenDoc={openDocModal}
+        formatBytes={formatBytes}
+        dateFormatter={dateFormatter}
+      />
+    );
+  }, [
+    activeTab,
+    title,
+    description,
+    search,
+    uploading,
+    docError,
+    filteredDocs,
+    dateFormatter,
+  ]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -151,21 +273,16 @@ export default function MyTasksLayout() {
         <nav className="lg:sticky lg:top-10 lg:h-fit lg:w-64">
           <div className="flex items-center justify-between lg:block">
             <div>
-              <h1 className="text-xl font-semibold text-slate-900">
-                My Tasks
-              </h1>
+              <h1 className="text-xl font-semibold text-slate-900">My Tasks</h1>
               <p className="mt-2 text-sm text-slate-600 lg:block">
                 Quick access to your work areas.
               </p>
             </div>
 
-            {/* Mobile navbar: classic bar with title and hamburger */}
             <details className="group relative lg:hidden">
               <summary className="mt-2 flex cursor-pointer items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-100">
                 
-                <span className="ml-auto text-lg leading-none text-slate-500">
-                  ☰
-                </span>
+                <span className="ml-auto text-lg leading-none text-slate-500">☰</span>
               </summary>
               <div className="absolute right-0 mt-2 w-48 rounded-xl border border-slate-200 bg-white shadow-lg">
                 <div className="flex flex-col divide-y divide-slate-100">
@@ -174,7 +291,7 @@ export default function MyTasksLayout() {
                       key={tab.id}
                       type="button"
                       className="px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => handleTabChange(tab.id)}
                     >
                       {tab.label}
                     </button>
@@ -184,7 +301,6 @@ export default function MyTasksLayout() {
             </details>
           </div>
 
-          {/* Desktop sidebar list */}
           <div className="mt-8 hidden flex-col gap-3 border-l border-slate-200 pl-4 lg:flex">
             {tabs.map((tab) => {
               const isActive = tab.id === activeTab;
@@ -192,7 +308,7 @@ export default function MyTasksLayout() {
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   className={`group rounded-md px-3 py-2 text-left text-sm font-medium transition lg:-ml-4 lg:border-l lg:border-transparent lg:pl-4 ${
                     isActive
                       ? 'bg-slate-100 text-slate-900 lg:border-slate-400'
@@ -202,9 +318,7 @@ export default function MyTasksLayout() {
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-left">{tab.label}</span>
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {tab.description}
-                  </p>
+                  <p className="mt-1 text-xs text-slate-500">{tab.description}</p>
                 </button>
               );
             })}
@@ -213,7 +327,21 @@ export default function MyTasksLayout() {
 
         <main className="flex-1 space-y-12">{content}</main>
       </div>
+
+      {selectedDoc && (
+        <DocumentModal
+          doc={selectedDoc}
+          editTitle={editTitle}
+          editDescription={editDescription}
+          onChangeTitle={setEditTitle}
+          onChangeDescription={setEditDescription}
+          onClose={closeDocModal}
+          onSave={handleUpdateDoc}
+          formatBytes={formatBytes}
+          dateFormatter={dateFormatter}
+          error={docError}
+        />
+      )}
     </div>
   );
 }
-
