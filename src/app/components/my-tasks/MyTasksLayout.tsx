@@ -5,8 +5,9 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import OverviewTab from './OverviewTab';
 import PlansTab from './PlansTab';
 import DocumentsTab from './DocumentsTab';
-import DocumentModal from './DocumentModal';
 import JournalTab from './JournalTab';
+import ExpenseTrackerTab from './ExpenseTrackerTab';
+import DocumentModal from './DocumentModal';
 import { DocumentWithUrl, TabId } from './types';
 
 const tabs: {
@@ -25,14 +26,19 @@ const tabs: {
     description: 'Upcoming milestones, timelines, and commitments.',
   },
   {
-    id: 'journal',
-    label: 'Journal',
-    description: 'Capture notes, reflections, and daily logs.',
-  },
-  {
     id: 'documents',
     label: 'My Documents',
     description: 'Upload and manage PDFs or images stored securely.',
+  },
+  {
+    id: 'journal',
+    label: 'Journal',
+    description: 'Daily reflection on mind, focus, learning, gratitude, and growth.',
+  },
+  {
+    id: 'expenses',
+    label: 'Expense Tracker',
+    description: 'Track income and expenses with monthly and yearly analytics.',
   },
 ];
 
@@ -254,6 +260,7 @@ export default function MyTasksLayout() {
     if (activeTab === 'overview') return <OverviewTab />;
     if (activeTab === 'plans') return <PlansTab />;
     if (activeTab === 'journal') return <JournalTab />;
+    if (activeTab === 'expenses') return <ExpenseTrackerTab />;
     return (
       <DocumentsTab
         title={title}
@@ -278,10 +285,10 @@ export default function MyTasksLayout() {
     description,
     search,
     uploading,
-    docsLoading,
     docError,
     filteredDocs,
     dateFormatter,
+    docsLoading,
   ]);
 
   return (
