@@ -1,6 +1,6 @@
 'use client';
 
-export type PeriodType = 'this_month' | 'all_time' | 'last_30_days';
+export type PeriodType = 'today' | 'this_month' | 'all_time';
 
 type PeriodSelectorProps = {
   selectedPeriod: PeriodType;
@@ -12,8 +12,8 @@ export default function PeriodSelector({
   onPeriodChange,
 }: PeriodSelectorProps) {
   const periods: { value: PeriodType; label: string }[] = [
+    { value: 'today', label: 'Today' },
     { value: 'this_month', label: 'This Month' },
-    { value: 'last_30_days', label: 'Last 30 Days' },
     { value: 'all_time', label: 'All Time' },
   ];
 

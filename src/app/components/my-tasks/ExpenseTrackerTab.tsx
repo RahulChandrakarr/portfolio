@@ -75,7 +75,7 @@ export default function ExpenseTrackerTab() {
   const searchInputRef = useState<HTMLInputElement | null>(null)[0];
 
   // Period selector state
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('this_month');
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('today');
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -157,7 +157,7 @@ export default function ExpenseTrackerTab() {
 
       const { data, error: fetchError } = await supabase
         .from('expense_transactions')
-        .select('*, category:expense_categories(*)')
+        .select('*')
         .eq('user_id', userData.user.id)
         .order('transaction_date', { ascending: false })
         .order('created_at', { ascending: false });
@@ -168,7 +168,44 @@ export default function ExpenseTrackerTab() {
         return;
       }
 
-      setTransactions((data as any) || []);
+      // Ensure data is properly formatted
+      const formattedData = (data || []).map((t: any) => {
+        // Normalize transaction_date to YYYY-MM-DD format
+        let normalizedDate = t.transaction_date;
+        if (normalizedDate) {
+          // If it's a full timestamp, extract just the date part
+          if (normalizedDate.includes('T')) {
+            normalizedDate = normalizedDate.split('T')[0];
+          }
+          // If it's not in YYYY-MM-DD format, try to parse it
+          if (!normalizedDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            try {
+              const date = new Date(normalizedDate);
+              normalizedDate = date.toISOString().split('T')[0];
+            } catch (e) {
+              console.warn('Could not parse date:', normalizedDate);
+            }
+          }
+        }
+        
+        return {
+          ...t,
+          transaction_date: normalizedDate, // Ensure date is in YYYY-MM-DD format
+          amount: typeof t.amount === 'string' ? parseFloat(t.amount) : Number(t.amount), // Ensure amount is a number
+        };
+      });
+      
+      console.log(`Loaded ${formattedData.length} transactions from database`);
+      if (formattedData.length > 0) {
+        console.log('Sample transactions:', formattedData.slice(0, 3).map(t => ({
+          id: t.id,
+          date: t.transaction_date,
+          amount: t.amount,
+          type: t.type,
+        })));
+      }
+      
+      setTransactions(formattedData);
       setError(null);
     } catch (err) {
       console.error('Error loading transactions', err);
@@ -190,21 +227,20 @@ export default function ExpenseTrackerTab() {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     switch (selectedPeriod) {
+      case 'today': {
+        const todayStr = today.toISOString().split('T')[0];
+        return {
+          from: todayStr,
+          to: todayStr,
+          label: today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        };
+      }
       case 'this_month': {
         const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
         return {
           from: firstDay.toISOString().split('T')[0],
           to: today.toISOString().split('T')[0],
           label: `${firstDay.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
-        };
-      }
-      case 'last_30_days': {
-        const thirtyDaysAgo = new Date(today);
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        return {
-          from: thirtyDaysAgo.toISOString().split('T')[0],
-          to: today.toISOString().split('T')[0],
-          label: `${thirtyDaysAgo.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
         };
       }
       case 'all_time':
@@ -239,8 +275,102 @@ export default function ExpenseTrackerTab() {
     // Period filter
     if (selectedPeriod !== 'all_time') {
       const { from, to } = getPeriodDateRange;
-      if (from) filtered = filtered.filter((t) => t.transaction_date >= from);
-      if (to) filtered = filtered.filter((t) => t.transaction_date <= to);
+      
+      // Normalize transaction dates to YYYY-MM-DD format for comparison
+      const normalizeDate = (dateStr: string | Date): string => {
+        if (!dateStr) return '';
+        
+        // If it's already in YYYY-MM-DD format, return as is
+        if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          return dateStr;
+        }
+        
+        // If it's a Date object, convert to YYYY-MM-DD
+        if (dateStr instanceof Date) {
+          const year = dateStr.getFullYear();
+          const month = String(dateStr.getMonth() + 1).padStart(2, '0');
+          const day = String(dateStr.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        }
+        
+        // Otherwise, try to parse and format
+        try {
+          // Handle various date formats
+          let date: Date;
+          if (typeof dateStr === 'string') {
+            // If it includes time, extract just the date part
+            if (dateStr.includes('T')) {
+              date = new Date(dateStr.split('T')[0]);
+            } else {
+              date = new Date(dateStr);
+            }
+          } else {
+            date = new Date(dateStr);
+          }
+          
+          // Check if date is valid
+          if (isNaN(date.getTime())) {
+            console.warn('Invalid date:', dateStr);
+            return '';
+          }
+          
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        } catch (e) {
+          console.warn('Error normalizing date:', dateStr, e);
+          return '';
+        }
+      };
+      
+      if (from && to) {
+        // For date range filters, include transactions on both start and end dates
+        filtered = filtered.filter((t) => {
+          if (!t.transaction_date) return false;
+          const normalizedDate = normalizeDate(t.transaction_date);
+          if (!normalizedDate) return false;
+          // Use string comparison for dates in YYYY-MM-DD format
+          return normalizedDate >= from && normalizedDate <= to;
+        });
+      } else if (from) {
+        filtered = filtered.filter((t) => {
+          if (!t.transaction_date) return false;
+          const normalizedDate = normalizeDate(t.transaction_date);
+          if (!normalizedDate) return false;
+          return normalizedDate >= from;
+        });
+      } else if (to) {
+        filtered = filtered.filter((t) => {
+          if (!t.transaction_date) return false;
+          const normalizedDate = normalizeDate(t.transaction_date);
+          if (!normalizedDate) return false;
+          return normalizedDate <= to;
+        });
+      }
+      
+      // Debug logging
+      console.log(`[Period Filter] Period: ${selectedPeriod}, From: ${from}, To: ${to}`);
+      console.log(`[Period Filter] Total transactions: ${transactions.length}, Filtered: ${filtered.length}`);
+      if (filtered.length > 0) {
+        console.log('[Period Filter] Sample filtered transactions:', filtered.slice(0, 3).map(t => {
+          const normalized = normalizeDate(t.transaction_date);
+          return {
+            original: t.transaction_date,
+            normalized: normalized,
+            amount: t.amount,
+            type: t.type,
+            inRange: from && to ? (normalized >= from && normalized <= to) : 'N/A'
+          };
+        }));
+      } else if (transactions.length > 0) {
+        console.log('[Period Filter] No transactions match. Sample transaction dates:', transactions.slice(0, 3).map(t => ({
+          original: t.transaction_date,
+          normalized: normalizeDate(t.transaction_date),
+          from: from,
+          to: to
+        })));
+      }
     }
 
     // Enhanced search filter
@@ -285,7 +415,12 @@ export default function ExpenseTrackerTab() {
       filtered = filtered.filter((t) => t.amount <= max);
     }
 
-    return filtered;
+    // Sort by transaction_date (descending) then created_at (descending)
+    return filtered.sort((a, b) => {
+      const dateCompare = new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime();
+      if (dateCompare !== 0) return dateCompare;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
   }, [
     transactions,
     selectedPeriod,
@@ -296,15 +431,24 @@ export default function ExpenseTrackerTab() {
     filterDateTo,
     filterAmountMin,
     filterAmountMax,
+    categories,
   ]);
 
   // Get previous period transactions for comparison
-  const previousPeriodTransactions = useMemo(() => {
+  const previousPeriodTransactions = useMemo((): ExpenseTransaction[] => {
     const now = new Date();
     let from: string;
     let to: string;
 
     switch (selectedPeriod) {
+      case 'today': {
+        // Compare with yesterday
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        from = yesterday.toISOString().split('T')[0];
+        to = yesterday.toISOString().split('T')[0];
+        break;
+      }
       case 'this_month': {
         const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -312,15 +456,7 @@ export default function ExpenseTrackerTab() {
         to = lastMonthEnd.toISOString().split('T')[0];
         break;
       }
-      case 'last_30_days': {
-        const sixtyDaysAgo = new Date(now);
-        sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-        const thirtyDaysAgo = new Date(now);
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        from = sixtyDaysAgo.toISOString().split('T')[0];
-        to = thirtyDaysAgo.toISOString().split('T')[0];
-        break;
-      }
+      case 'all_time':
       default:
         return [];
     }
@@ -332,21 +468,45 @@ export default function ExpenseTrackerTab() {
 
   // Calculate summary statistics with month-over-month comparison
   const summary = useMemo(() => {
-    const income = filteredTransactions
-      .filter((t) => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
-    const expenses = filteredTransactions
-      .filter((t) => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+    console.log(`[Summary] Calculating for period: ${selectedPeriod}`);
+    console.log(`[Summary] Filtered transactions count: ${filteredTransactions.length}`);
+    console.log(`[Summary] Date range: ${getPeriodDateRange.from} to ${getPeriodDateRange.to}`);
+    
+    // Ensure amounts are numbers (handle string/numeric types from database)
+    const incomeTransactions = filteredTransactions.filter((t) => t.type === 'income');
+    const expenseTransactions = filteredTransactions.filter((t) => t.type === 'expense');
+    
+    console.log(`[Summary] Income transactions: ${incomeTransactions.length}, Expense transactions: ${expenseTransactions.length}`);
+    
+    const income = incomeTransactions.reduce((sum, t) => {
+      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : Number(t.amount);
+      const validAmount = isNaN(amount) ? 0 : amount;
+      return sum + validAmount;
+    }, 0);
+    
+    const expenses = expenseTransactions.reduce((sum, t) => {
+      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : Number(t.amount);
+      const validAmount = isNaN(amount) ? 0 : amount;
+      return sum + validAmount;
+    }, 0);
+    
     const net = income - expenses;
+    
+    console.log(`[Summary] Income: ${income}, Expenses: ${expenses}, Net: ${net}`);
 
     // Previous period calculations
     const prevIncome = previousPeriodTransactions
       .filter((t) => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => {
+        const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : Number(t.amount);
+        return sum + (isNaN(amount) ? 0 : amount);
+      }, 0);
     const prevExpenses = previousPeriodTransactions
       .filter((t) => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => {
+        const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : Number(t.amount);
+        return sum + (isNaN(amount) ? 0 : amount);
+      }, 0);
     const prevNet = prevIncome - prevExpenses;
 
     // Calculate changes
@@ -428,10 +588,17 @@ export default function ExpenseTrackerTab() {
     return counts;
   }, [transactions]);
 
-  // Recent transactions (last 10)
+  // Recent transactions (last 10, from ALL transactions regardless of period filter)
+  // This shows the most recent transactions to help users see their latest activity
   const recentTransactions = useMemo(() => {
-    return filteredTransactions.slice(0, 10);
-  }, [filteredTransactions]);
+    // Sort all transactions by most recent first (by transaction_date, then created_at)
+    const sorted = [...transactions].sort((a, b) => {
+      const dateCompare = new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime();
+      if (dateCompare !== 0) return dateCompare;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+    return sorted.slice(0, 10);
+  }, [transactions]);
 
   // Open transaction modal
   const openTransactionModal = (transaction?: ExpenseTransaction, isDuplicate = false) => {
@@ -528,12 +695,13 @@ export default function ExpenseTrackerTab() {
       addNotification('success', 'Transaction added successfully!');
     }
 
+    // Reload transactions immediately
+    await loadTransactions();
+
     // Clear form and close modal after a short delay
     setTimeout(() => {
       closeTransactionModal();
     }, 1500);
-
-    await loadTransactions();
   };
 
   // Notification helper

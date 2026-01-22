@@ -79,7 +79,7 @@ export default function ExpenseDashboardView({
   return (
     <div className="space-y-6">
       {/* Period Selector */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="w-full sm:w-auto">
           <p className="text-xs text-slate-500 mb-1">Focus Period</p>
           <PeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={onPeriodChange} />
@@ -88,10 +88,10 @@ export default function ExpenseDashboardView({
           <p className="text-xs text-slate-500">Date Range</p>
           <p className="text-sm font-medium text-slate-700">{dateRangeLabel}</p>
         </div>
-      </div>
+      </div> */}
 
       {/* Summary Cards */}
-      <SummaryCards
+      {/* <SummaryCards
         income={summary.income}
         expenses={summary.expenses}
         net={summary.net}
@@ -102,10 +102,10 @@ export default function ExpenseDashboardView({
         expensesChangePercent={summary.expensesChangePercent}
         netChangePercent={summary.netChangePercent}
         currencyFormatter={currencyFormatter}
-      />
+      /> */}
 
       {/* Quick Chart Section */}
-      <div className="md:block">
+      {/* <div className="md:block">
         <h3 className="mb-4 text-lg font-semibold text-slate-900">Spending by Category</h3>
         <div className="md:max-h-64 overflow-y-auto">
           <CategoryBreakdown
@@ -114,7 +114,7 @@ export default function ExpenseDashboardView({
             currencyFormatter={currencyFormatter}
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Filters */}
       <ExpenseFilters

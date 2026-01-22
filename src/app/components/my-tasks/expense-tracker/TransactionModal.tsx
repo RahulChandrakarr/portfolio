@@ -204,6 +204,7 @@ export default function TransactionModal({
             </>
           )}
         </div>
+        </div>
       </div>
 
       {/* Mobile Modal (Bottom Sheet) */}
