@@ -14,6 +14,9 @@ import ExpenseYearlyView from './expense-tracker/ExpenseYearlyView';
 import ExpenseCategoriesView from './expense-tracker/ExpenseCategoriesView';
 import TransactionModal from './expense-tracker/TransactionModal';
 import CategoryModal from './expense-tracker/CategoryModal';
+import DeleteCategoryModal from './expense-tracker/DeleteCategoryModal';
+import DeleteTransactionModal from './expense-tracker/DeleteTransactionModal';
+import UndoNotification from './expense-tracker/UndoNotification';
 import SuccessNotification from './expense-tracker/SuccessNotification';
 import { PeriodType } from './expense-tracker/PeriodSelector';
 
@@ -34,6 +37,7 @@ const defaultCategories: Omit<ExpenseCategory, 'id' | 'user_id' | 'created_at'>[
 export default function ExpenseTrackerTab() {
   const supabase = useMemo(() => createClientComponentClient(), []);
   const [activeView, setActiveView] = useState<ExpenseView>('dashboard');
+  const [navigateToMonth, setNavigateToMonth] = useState<{ year: number; month: number } | null>(null);
   const [transactions, setTransactions] = useState<ExpenseTransaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [loading, setLoading] = useState(false);
@@ -60,6 +64,13 @@ export default function ExpenseTrackerTab() {
   const [categoryIcon, setCategoryIcon] = useState('💰');
   const [categoryType, setCategoryType] = useState<TransactionType>('expense');
   const [categoryModalFromTransaction, setCategoryModalFromTransaction] = useState(false);
+  const [categoryValidationErrors, setCategoryValidationErrors] = useState<{ name?: string }>({});
+  const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<ExpenseCategory | null>(null);
+  const [showDeleteTransactionModal, setShowDeleteTransactionModal] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<ExpenseTransaction | null>(null);
+  const [deletedTransaction, setDeletedTransaction] = useState<ExpenseTransaction | null>(null);
+  const [showUndoNotification, setShowUndoNotification] = useState(false);
 
   // Period selector state
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('this_month');
@@ -380,15 +391,27 @@ export default function ExpenseTrackerTab() {
     return breakdown;
   }, [filteredTransactions]);
 
+  // Category transaction counts
+  const categoryTransactionCounts = useMemo(() => {
+    const counts: { [key: string]: number } = {};
+    transactions.forEach((t) => {
+      const catId = t.category_id;
+      if (!counts[catId]) counts[catId] = 0;
+      counts[catId]++;
+    });
+    return counts;
+  }, [transactions]);
+
   // Recent transactions (last 10)
   const recentTransactions = useMemo(() => {
     return filteredTransactions.slice(0, 10);
   }, [filteredTransactions]);
 
   // Open transaction modal
-  const openTransactionModal = (transaction?: ExpenseTransaction) => {
+  const openTransactionModal = (transaction?: ExpenseTransaction, isDuplicate = false) => {
     if (transaction) {
-      setEditingTransaction(transaction);
+      // If duplicating, don't set editingTransaction so it creates a new one
+      setEditingTransaction(isDuplicate ? null : transaction);
       setTransactionType(transaction.type);
       setTransactionAmount(transaction.amount.toString());
       setTransactionCategory(transaction.category_id);
@@ -488,28 +511,99 @@ export default function ExpenseTrackerTab() {
     await loadTransactions();
   };
 
-  // Delete transaction
-  const handleDeleteTransaction = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this transaction?')) return;
+  // Open delete transaction modal
+  const handleDeleteTransactionClick = (transaction: ExpenseTransaction) => {
+    setTransactionToDelete(transaction);
+    setShowDeleteTransactionModal(true);
+  };
+
+  // Delete transaction (from modal)
+  const handleDeleteTransaction = async () => {
+    if (!transactionToDelete) return;
 
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError || !userData?.user) {
       setError('You must be signed in to delete transactions.');
+      setShowDeleteTransactionModal(false);
+      setTransactionToDelete(null);
       return;
     }
+
+    // Store transaction for undo
+    setDeletedTransaction(transactionToDelete);
 
     const { error: deleteError } = await supabase
       .from('expense_transactions')
       .delete()
-      .eq('id', id)
+      .eq('id', transactionToDelete.id)
       .eq('user_id', userData.user.id);
 
     if (deleteError) {
       setError(deleteError.message);
+      setShowDeleteTransactionModal(false);
+      setTransactionToDelete(null);
+      setDeletedTransaction(null);
       return;
     }
 
+    setShowDeleteTransactionModal(false);
+    setTransactionToDelete(null);
+    setSuccessMessage('Transaction deleted successfully!');
+    setShowUndoNotification(true);
+
     await loadTransactions();
+
+    // Auto-hide undo notification after 5 seconds
+    setTimeout(() => {
+      setShowUndoNotification(false);
+      setDeletedTransaction(null);
+    }, 5000);
+  };
+
+  // Undo delete transaction
+  const handleUndoDelete = async () => {
+    if (!deletedTransaction) return;
+
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData?.user) {
+      setError('You must be signed in to restore transactions.');
+      return;
+    }
+
+    // Find the category for the transaction
+    const category = categories.find((c) => c.id === deletedTransaction.category_id);
+    if (!category) {
+      setError('Category not found. Cannot restore transaction.');
+      return;
+    }
+
+    const transactionData = {
+      user_id: userData.user.id,
+      type: deletedTransaction.type,
+      amount: deletedTransaction.amount,
+      category_id: deletedTransaction.category_id,
+      description: deletedTransaction.description,
+      transaction_date: deletedTransaction.transaction_date,
+    };
+
+    const { error: insertError } = await supabase
+      .from('expense_transactions')
+      .insert(transactionData);
+
+    if (insertError) {
+      setError(insertError.message);
+      return;
+    }
+
+    setShowUndoNotification(false);
+    setDeletedTransaction(null);
+    setSuccessMessage('Transaction restored successfully!');
+
+    await loadTransactions();
+
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 2000);
   };
 
   // Open category modal
@@ -542,6 +636,7 @@ export default function ExpenseTrackerTab() {
     setCategoryIcon('💰');
     setCategoryType('expense');
     setCategoryModalFromTransaction(false);
+    setCategoryValidationErrors({});
     
     // If opened from transaction modal, reopen transaction modal
     if (wasFromTransaction) {
@@ -551,15 +646,37 @@ export default function ExpenseTrackerTab() {
 
   // Save category
   const handleSaveCategory = async () => {
+    setCategoryValidationErrors({});
+    setError(null);
+
     if (!categoryName.trim()) {
-      setError('Please enter a category name');
+      setCategoryValidationErrors({ name: 'Category name is required' });
       return;
     }
 
-    setError(null);
+    if (categoryName.trim().length > 20) {
+      setCategoryValidationErrors({ name: 'Category name must be 20 characters or less' });
+      return;
+    }
+
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError || !userData?.user) {
       setError('You must be signed in to save categories.');
+      return;
+    }
+
+    // Check for duplicate name (within same type)
+    const duplicate = categories.find(
+      (cat) =>
+        cat.name.toLowerCase() === categoryName.trim().toLowerCase() &&
+        cat.type === categoryType &&
+        (!editingCategory || cat.id !== editingCategory.id)
+    );
+
+    if (duplicate) {
+      setCategoryValidationErrors({
+        name: `A ${categoryType} category with this name already exists`,
+      });
       return;
     }
 
@@ -586,6 +703,7 @@ export default function ExpenseTrackerTab() {
         return;
       }
       newCategoryId = editingCategory.id;
+      setSuccessMessage('Category updated successfully!');
     } else {
       // Insert
       const { data: insertedData, error: insertError } = await supabase
@@ -599,6 +717,7 @@ export default function ExpenseTrackerTab() {
         return;
       }
       newCategoryId = insertedData?.id || null;
+      setSuccessMessage('Category created successfully!');
     }
 
     await loadCategories();
@@ -608,12 +727,24 @@ export default function ExpenseTrackerTab() {
       setTransactionCategory(newCategoryId);
     }
 
-    closeCategoryModal();
+    setTimeout(() => {
+      closeCategoryModal();
+      setSuccessMessage(null);
+    }, 1500);
   };
 
-  // Delete category
-  const handleDeleteCategory = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this category? All transactions in this category will be deleted.')) return;
+  // Open delete category modal
+  const handleDeleteCategoryClick = (id: string) => {
+    const category = categories.find((c) => c.id === id);
+    if (category) {
+      setCategoryToDelete(category);
+      setShowDeleteCategoryModal(true);
+    }
+  };
+
+  // Delete category with reassignment
+  const handleDeleteCategory = async (reassignToCategoryId?: string) => {
+    if (!categoryToDelete) return;
 
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError || !userData?.user) {
@@ -621,19 +752,46 @@ export default function ExpenseTrackerTab() {
       return;
     }
 
+    // If reassigning, update transactions first
+    if (reassignToCategoryId) {
+      const { error: updateError } = await supabase
+        .from('expense_transactions')
+        .update({ category_id: reassignToCategoryId })
+        .eq('category_id', categoryToDelete.id)
+        .eq('user_id', userData.user.id);
+
+      if (updateError) {
+        setError(updateError.message);
+        setShowDeleteCategoryModal(false);
+        setCategoryToDelete(null);
+        return;
+      }
+    }
+
+    // Delete the category
     const { error: deleteError } = await supabase
       .from('expense_categories')
       .delete()
-      .eq('id', id)
+      .eq('id', categoryToDelete.id)
       .eq('user_id', userData.user.id);
 
     if (deleteError) {
       setError(deleteError.message);
+      setShowDeleteCategoryModal(false);
+      setCategoryToDelete(null);
       return;
     }
 
+    setShowDeleteCategoryModal(false);
+    setCategoryToDelete(null);
+    setSuccessMessage('Category deleted successfully!');
+    
     await loadCategories();
     await loadTransactions();
+
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 2000);
   };
 
   // Export to CSV
@@ -752,7 +910,7 @@ export default function ExpenseTrackerTab() {
           onAmountMinChange={setFilterAmountMin}
           onAmountMaxChange={setFilterAmountMax}
           onEditTransaction={openTransactionModal}
-          onDeleteTransaction={handleDeleteTransaction}
+          onDeleteTransaction={handleDeleteTransactionClick}
           onViewAllTransactions={() => setActiveView('monthly')}
         />
       )}
@@ -760,18 +918,44 @@ export default function ExpenseTrackerTab() {
       {/* Monthly View */}
       {activeView === 'monthly' && (
         <ExpenseMonthlyView
-          monthlyBreakdown={monthlyBreakdown}
-          filteredTransactions={filteredTransactions}
+          transactions={transactions}
           categories={categories}
           currencyFormatter={currencyFormatter}
+          dateFormatter={dateFormatter}
+          initialYear={navigateToMonth?.year}
+          initialMonth={navigateToMonth?.month}
+          onEditTransaction={openTransactionModal}
+          onDeleteTransaction={handleDeleteTransactionClick}
+          onDuplicateTransaction={(transaction) => {
+            openTransactionModal(transaction, true);
+          }}
+        />
+      )}
+      
+      {/* Clear navigation state after use */}
+      {navigateToMonth && activeView === 'monthly' && (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if (typeof window !== 'undefined') { setTimeout(() => { /* Navigation state cleared */ }, 0); }`,
+          }}
         />
       )}
 
       {/* Yearly View */}
       {activeView === 'yearly' && (
         <ExpenseYearlyView
-          yearlyBreakdown={yearlyBreakdown}
+          transactions={transactions}
+          categories={categories}
           currencyFormatter={currencyFormatter}
+          dateFormatter={dateFormatter}
+          onEditTransaction={openTransactionModal}
+          onDeleteTransaction={handleDeleteTransactionClick}
+          onNavigateToMonth={(year, month) => {
+            setNavigateToMonth({ year, month });
+            setActiveView('monthly');
+            // Clear navigation state after a brief delay
+            setTimeout(() => setNavigateToMonth(null), 100);
+          }}
         />
       )}
 
@@ -780,10 +964,11 @@ export default function ExpenseTrackerTab() {
         <ExpenseCategoriesView
           categories={categories}
           categoryBreakdown={categoryBreakdown}
+          categoryTransactionCounts={categoryTransactionCounts}
           currencyFormatter={currencyFormatter}
           onAddCategory={() => openCategoryModal()}
           onEditCategory={openCategoryModal}
-          onDeleteCategory={handleDeleteCategory}
+          onDeleteCategory={handleDeleteCategoryClick}
         />
       )}
 
@@ -807,11 +992,36 @@ export default function ExpenseTrackerTab() {
         onDateChange={setTransactionDate}
         onTimeChange={setTransactionTime}
         onSave={handleSaveTransaction}
+        onDelete={
+          editingTransaction
+            ? () => {
+                setShowTransactionModal(false);
+                handleDeleteTransactionClick(editingTransaction);
+              }
+            : undefined
+        }
         onCreateCategory={() => {
           setCategoryModalFromTransaction(true);
           setShowTransactionModal(false);
           openCategoryModal();
         }}
+      />
+
+      {/* Delete Transaction Modal */}
+      <DeleteTransactionModal
+        show={showDeleteTransactionModal}
+        transaction={transactionToDelete}
+        category={
+          transactionToDelete
+            ? categories.find((c) => c.id === transactionToDelete.category_id) || null
+            : null
+        }
+        currencyFormatter={currencyFormatter}
+        onClose={() => {
+          setShowDeleteTransactionModal(false);
+          setTransactionToDelete(null);
+        }}
+        onDelete={handleDeleteTransaction}
       />
 
       {/* Success Notification */}
@@ -822,6 +1032,17 @@ export default function ExpenseTrackerTab() {
         />
       )}
 
+      {/* Undo Notification */}
+      <UndoNotification
+        show={showUndoNotification}
+        message="Transaction deleted"
+        onUndo={handleUndoDelete}
+        onClose={() => {
+          setShowUndoNotification(false);
+          setDeletedTransaction(null);
+        }}
+      />
+
       {/* Category Modal */}
       <CategoryModal
         show={showCategoryModal}
@@ -830,13 +1051,32 @@ export default function ExpenseTrackerTab() {
         categoryColor={categoryColor}
         categoryIcon={categoryIcon}
         categoryType={categoryType}
+        transactionCount={
+          editingCategory ? categoryTransactionCounts[editingCategory.id] || 0 : 0
+        }
         error={error}
+        validationErrors={categoryValidationErrors}
         onClose={closeCategoryModal}
         onNameChange={setCategoryName}
         onColorChange={setCategoryColor}
         onIconChange={setCategoryIcon}
         onTypeChange={setCategoryType}
         onSave={handleSaveCategory}
+      />
+
+      {/* Delete Category Modal */}
+      <DeleteCategoryModal
+        show={showDeleteCategoryModal}
+        category={categoryToDelete}
+        transactionCount={
+          categoryToDelete ? categoryTransactionCounts[categoryToDelete.id] || 0 : 0
+        }
+        availableCategories={categories}
+        onClose={() => {
+          setShowDeleteCategoryModal(false);
+          setCategoryToDelete(null);
+        }}
+        onDelete={handleDeleteCategory}
       />
     </section>
   );

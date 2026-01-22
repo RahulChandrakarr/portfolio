@@ -9,7 +9,7 @@ type RecentTransactionsTableProps = {
   dateFormatter: Intl.DateTimeFormat;
   currencyFormatter: Intl.NumberFormat;
   onEdit: (transaction: ExpenseTransaction) => void;
-  onDelete: (id: string) => void;
+  onDelete: (transaction: ExpenseTransaction) => void;
   onViewAll?: () => void;
 };
 
@@ -140,7 +140,7 @@ export default function RecentTransactionsTable({
                         </svg>
                       </button>
                       <button
-                        onClick={() => onDelete(transaction.id)}
+                        onClick={() => onDelete(transaction)}
                         className="rounded-lg p-1.5 hover:bg-red-50 transition-colors"
                         aria-label="Delete"
                       >

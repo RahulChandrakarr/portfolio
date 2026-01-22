@@ -41,7 +41,7 @@ type ExpenseDashboardViewProps = {
   onAmountMinChange: (value: string) => void;
   onAmountMaxChange: (value: string) => void;
   onEditTransaction: (transaction: ExpenseTransaction) => void;
-  onDeleteTransaction: (id: string) => void;
+  onDeleteTransaction: (transaction: ExpenseTransaction) => void;
   onViewAllTransactions?: () => void;
 };
 

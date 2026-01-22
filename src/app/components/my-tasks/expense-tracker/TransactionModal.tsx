@@ -24,6 +24,7 @@ type TransactionModalProps = {
   onDateChange: (value: string) => void;
   onTimeChange: (value: string) => void;
   onSave: () => void;
+  onDelete?: () => void;
   onCreateCategory: () => void;
 };
 
@@ -46,6 +47,7 @@ export default function TransactionModal({
   onDateChange,
   onTimeChange,
   onSave,
+  onDelete,
   onCreateCategory,
 }: TransactionModalProps) {
   const [validationErrors, setValidationErrors] = useState<TransactionFormErrors>({});
@@ -156,18 +158,43 @@ export default function TransactionModal({
 
         {/* Footer */}
         <div className="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4 flex gap-3">
-          <button
-            onClick={handleClose}
-            className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="flex-1 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition-colors"
-          >
-            {editingTransaction ? 'Update' : 'Add'} Transaction
-          </button>
+          {editingTransaction && onDelete ? (
+            <>
+              <button
+                onClick={onDelete}
+                className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 transition-colors"
+              >
+                Delete
+              </button>
+              <button
+                onClick={handleClose}
+                className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="flex-1 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition-colors"
+              >
+                Update Transaction
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleClose}
+                className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="flex-1 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition-colors"
+              >
+                Add Transaction
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
