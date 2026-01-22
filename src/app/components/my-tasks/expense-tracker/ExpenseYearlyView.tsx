@@ -10,6 +10,8 @@ import QuarterlySummary from './QuarterlySummary';
 import MonthCard from './MonthCard';
 import YearlyFilters from './YearlyFilters';
 import YearlyAnalysis from './YearlyAnalysis';
+import SearchBar from './SearchBar';
+import ExportButton from './ExportButton';
 
 type ExpenseYearlyViewProps = {
   transactions: ExpenseTransaction[];
@@ -450,6 +452,16 @@ export default function ExpenseYearlyView({
           })}
         </div>
       </div>
+
+      {/* Search Bar */}
+      <SearchBar
+        value={searchQuery}
+        resultCount={filteredTransactions.length}
+        totalCount={yearTransactions.length}
+        placeholder="Search by description, category, or date (DD/MM/YYYY)..."
+        onChange={setSearchQuery}
+        onClear={() => setSearchQuery('')}
+      />
 
       {/* Filters */}
       <YearlyFilters

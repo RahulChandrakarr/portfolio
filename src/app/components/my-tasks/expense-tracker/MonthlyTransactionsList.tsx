@@ -102,14 +102,16 @@ export default function MonthlyTransactionsList({
       {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700">Sort by:</label>
+          <label htmlFor="sort-select" className="text-sm font-medium text-slate-700">Sort by:</label>
           <select
+            id="sort-select"
             value={sortBy}
             onChange={(e) => {
               setSortBy(e.target.value as SortOption);
               setCurrentPage(1);
             }}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            className="min-h-[44px] rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+            aria-label="Sort transactions"
           >
             <option value="date_desc">Date (Newest)</option>
             <option value="date_asc">Date (Oldest)</option>
@@ -120,14 +122,16 @@ export default function MonthlyTransactionsList({
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700">Group by:</label>
+          <label htmlFor="group-select" className="text-sm font-medium text-slate-700">Group by:</label>
           <select
+            id="group-select"
             value={groupBy}
             onChange={(e) => {
               setGroupBy(e.target.value as GroupOption);
               setCurrentPage(1);
             }}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            className="min-h-[44px] rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+            aria-label="Group transactions"
           >
             <option value="none">None</option>
             <option value="date">Date</option>
@@ -136,14 +140,16 @@ export default function MonthlyTransactionsList({
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700">Per page:</label>
+          <label htmlFor="per-page-select" className="text-sm font-medium text-slate-700">Per page:</label>
           <select
+            id="per-page-select"
             value={itemsPerPage}
             onChange={(e) => {
               setItemsPerPage(Number(e.target.value));
               setCurrentPage(1);
             }}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            className="min-h-[44px] rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+            aria-label="Items per page"
           >
             <option value="20">20</option>
             <option value="50">50</option>
@@ -199,6 +205,15 @@ export default function MonthlyTransactionsList({
                     key={transaction.id}
                     className="hover:bg-slate-50 transition-colors cursor-pointer"
                     onClick={() => onEdit(transaction)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Transaction: ${category?.name || 'Unknown'} - ${currencyFormatter.format(transaction.amount)} on ${new Date(transaction.transaction_date).toLocaleDateString()}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onEdit(transaction);
+                      }
+                    }}
                   >
                     <td className="px-4 py-3 text-sm text-slate-700">
                       {new Date(transaction.transaction_date).toLocaleDateString('en-US', {
@@ -274,8 +289,8 @@ export default function MonthlyTransactionsList({
                         {onDuplicate && (
                           <button
                             onClick={() => onDuplicate(transaction)}
-                            className="rounded-lg p-1.5 hover:bg-slate-100 transition-colors"
-                            aria-label="Duplicate"
+                            className="min-w-[44px] min-h-[44px] rounded-lg p-1.5 hover:bg-slate-100 active:bg-slate-200 transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                            aria-label={`Duplicate transaction: ${category?.name || 'Unknown'}`}
                           >
                             <svg
                               className="w-4 h-4 text-slate-600"
@@ -294,8 +309,8 @@ export default function MonthlyTransactionsList({
                         )}
                         <button
                           onClick={() => onDelete(transaction)}
-                          className="rounded-lg p-1.5 hover:bg-red-50 transition-colors"
-                          aria-label="Delete"
+                          className="min-w-[44px] min-h-[44px] rounded-lg p-1.5 hover:bg-red-50 active:bg-red-100 transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                          aria-label={`Delete transaction: ${category?.name || 'Unknown'}`}
                         >
                           <svg
                             className="w-4 h-4 text-red-600"

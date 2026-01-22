@@ -26,7 +26,7 @@ export default function CategoryBreakdown({
   const maxAmount = Math.max(...Object.values(categoryBreakdown));
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" role="img" aria-label="Category spending breakdown chart">
       {sortedCategories.map(([catId, amount]) => {
         const category = categories.find((c) => c.id === catId);
         if (!category) return null;
@@ -36,20 +36,24 @@ export default function CategoryBreakdown({
           <div key={catId} className="space-y-1">
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
-                <span>{category.icon}</span>
-                <span className="font-medium text-slate-900">{category.name}</span>
+                <span aria-hidden="true">{category.icon}</span>
+                <span className="font-medium text-slate-900">
+                  {category.name}
+                  <span className="sr-only">: {currencyFormatter.format(amount)} ({percentage.toFixed(1)}% of total)</span>
+                </span>
               </div>
-              <span className="font-semibold text-slate-900">
+              <span className="font-semibold text-slate-900" aria-hidden="true">
                 {currencyFormatter.format(amount)}
               </span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200" role="progressbar" aria-valuenow={percentage} aria-valuemin={0} aria-valuemax={100} aria-label={`${category.name} spending: ${percentage.toFixed(1)}%`}>
               <div
                 className="h-full transition-all"
                 style={{
                   width: `${percentage}%`,
                   backgroundColor: category.color,
                 }}
+                aria-hidden="true"
               />
             </div>
           </div>

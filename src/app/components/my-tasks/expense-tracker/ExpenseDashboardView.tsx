@@ -3,7 +3,10 @@
 import { ExpenseTransaction, ExpenseCategory } from '../types';
 import SummaryCards from './SummaryCards';
 import ExpenseFilters from './ExpenseFilters';
+import SearchBar from './SearchBar';
+import ExportButton from './ExportButton';
 import RecentTransactionsTable from './RecentTransactionsTable';
+import MobileTransactionCard from './MobileTransactionCard';
 import CategoryBreakdown from './CategoryBreakdown';
 import PeriodSelector, { PeriodType } from './PeriodSelector';
 
@@ -43,6 +46,7 @@ type ExpenseDashboardViewProps = {
   onEditTransaction: (transaction: ExpenseTransaction) => void;
   onDeleteTransaction: (transaction: ExpenseTransaction) => void;
   onViewAllTransactions?: () => void;
+  allTransactions?: ExpenseTransaction[];
 };
 
 export default function ExpenseDashboardView({
@@ -75,12 +79,12 @@ export default function ExpenseDashboardView({
   return (
     <div className="space-y-6">
       {/* Period Selector */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="w-full sm:w-auto">
           <p className="text-xs text-slate-500 mb-1">Focus Period</p>
           <PeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={onPeriodChange} />
         </div>
-        <div className="text-right">
+        <div className="text-left sm:text-right">
           <p className="text-xs text-slate-500">Date Range</p>
           <p className="text-sm font-medium text-slate-700">{dateRangeLabel}</p>
         </div>
@@ -101,13 +105,15 @@ export default function ExpenseDashboardView({
       />
 
       {/* Quick Chart Section */}
-      <div>
+      <div className="md:block">
         <h3 className="mb-4 text-lg font-semibold text-slate-900">Spending by Category</h3>
-        <CategoryBreakdown
-          categoryBreakdown={categoryBreakdown}
-          categories={categories}
-          currencyFormatter={currencyFormatter}
-        />
+        <div className="md:max-h-64 overflow-y-auto">
+          <CategoryBreakdown
+            categoryBreakdown={categoryBreakdown}
+            categories={categories}
+            currencyFormatter={currencyFormatter}
+          />
+        </div>
       </div>
 
       {/* Filters */}

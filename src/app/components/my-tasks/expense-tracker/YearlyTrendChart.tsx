@@ -34,8 +34,8 @@ export default function YearlyTrendChart({
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-end gap-2 h-64">
+    <div className="space-y-4" role="img" aria-label="Monthly income and expense trend chart">
+      <div className="flex items-end gap-1 md:gap-2 h-48 md:h-64 overflow-x-auto">
         {monthlyData.map((month) => {
           const incomeHeight = (month.income / maxAmount) * 100;
           const expensesHeight = (month.expenses / maxAmount) * 100;

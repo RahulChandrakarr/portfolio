@@ -40,7 +40,9 @@ export default function SearchBar({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+          className="w-full min-h-[44px] pl-10 pr-10 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+          aria-label="Search transactions"
+          aria-describedby={value && resultCount !== undefined ? "search-results" : undefined}
         />
         {value && (
           <button
@@ -65,7 +67,7 @@ export default function SearchBar({
         )}
       </div>
       {value && resultCount !== undefined && totalCount !== undefined && (
-        <p className="text-xs text-slate-500">
+        <p id="search-results" className="text-xs text-slate-500" role="status" aria-live="polite">
           Found {resultCount} of {totalCount} transaction{resultCount !== 1 ? 's' : ''}
         </p>
       )}

@@ -44,7 +44,7 @@ export default function SummaryCards({
   };
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
         <p className="text-xs font-medium text-emerald-700">Total Income</p>
         <p className="mt-2 text-2xl font-bold text-emerald-900">

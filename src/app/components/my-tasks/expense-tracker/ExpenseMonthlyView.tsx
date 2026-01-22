@@ -9,6 +9,8 @@ import MonthlyBarChart from './MonthlyBarChart';
 import CategoryBreakdownTable from './CategoryBreakdownTable';
 import MonthlyFilters from './MonthlyFilters';
 import MonthlyTransactionsList from './MonthlyTransactionsList';
+import SearchBar from './SearchBar';
+import ExportButton from './ExportButton';
 
 type ExpenseMonthlyViewProps = {
   transactions: ExpenseTransaction[];
@@ -400,6 +402,16 @@ export default function ExpenseMonthlyView({
           }}
         />
       </div>
+
+      {/* Search Bar */}
+      <SearchBar
+        value={searchQuery}
+        resultCount={filteredTransactions.length}
+        totalCount={monthTransactions.length}
+        placeholder="Search by description, category, or date (DD/MM/YYYY)..."
+        onChange={setSearchQuery}
+        onClear={() => setSearchQuery('')}
+      />
 
       {/* Filters */}
       <MonthlyFilters

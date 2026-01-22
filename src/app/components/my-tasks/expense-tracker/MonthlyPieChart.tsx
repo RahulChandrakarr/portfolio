@@ -32,9 +32,9 @@ export default function MonthlyPieChart({
   let currentAngle = 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" role="img" aria-label="Monthly expense breakdown by category">
       <div className="flex items-center justify-center">
-        <div className="relative w-64 h-64">
+        <div className="relative w-48 h-48 md:w-64 md:h-64">
           <svg viewBox="0 0 100 100" className="transform -rotate-90">
             {topCategories.map((item, index) => {
               const percentage = item.percentage;

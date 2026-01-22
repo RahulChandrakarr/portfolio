@@ -24,8 +24,8 @@ export default function MonthlyBarChart({
   const maxAmount = Math.max(...dailyData.map((d) => d.amount), 1);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-end gap-1 h-48">
+    <div className="space-y-4" role="img" aria-label="Daily expense trend chart">
+      <div className="flex items-end gap-1 h-32 md:h-48 overflow-x-auto">
         {dailyData.map((day) => {
           const height = maxAmount > 0 ? (day.amount / maxAmount) * 100 : 0;
           return (

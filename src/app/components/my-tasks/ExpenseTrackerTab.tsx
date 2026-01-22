@@ -17,7 +17,8 @@ import CategoryModal from './expense-tracker/CategoryModal';
 import DeleteCategoryModal from './expense-tracker/DeleteCategoryModal';
 import DeleteTransactionModal from './expense-tracker/DeleteTransactionModal';
 import UndoNotification from './expense-tracker/UndoNotification';
-import SuccessNotification from './expense-tracker/SuccessNotification';
+import NotificationSystem, { Notification, NotificationType } from './expense-tracker/NotificationSystem';
+import { useKeyboardShortcuts } from './expense-tracker/useKeyboardShortcuts';
 import { PeriodType } from './expense-tracker/PeriodSelector';
 
 // Default categories with icons and colors
@@ -54,7 +55,6 @@ export default function ExpenseTrackerTab() {
     new Date().toISOString().split('T')[0]
   );
   const [transactionTime, setTransactionTime] = useState('');
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Category modal state
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -71,6 +71,8 @@ export default function ExpenseTrackerTab() {
   const [transactionToDelete, setTransactionToDelete] = useState<ExpenseTransaction | null>(null);
   const [deletedTransaction, setDeletedTransaction] = useState<ExpenseTransaction | null>(null);
   const [showUndoNotification, setShowUndoNotification] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const searchInputRef = useState<HTMLInputElement | null>(null)[0];
 
   // Period selector state
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('this_month');
@@ -215,6 +217,21 @@ export default function ExpenseTrackerTab() {
     }
   }, [selectedPeriod]);
 
+  // Enhanced search function with date parsing
+  const parseSearchQuery = (query: string) => {
+    const trimmed = query.trim().toLowerCase();
+    
+    // Try to parse date in DD/MM/YYYY or DD-MM-YYYY format
+    const dateMatch = trimmed.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (dateMatch) {
+      const [, day, month, year] = dateMatch;
+      const dateStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      return { type: 'date' as const, value: dateStr };
+    }
+    
+    return { type: 'text' as const, value: trimmed };
+  };
+
   // Filtered transactions
   const filteredTransactions = useMemo(() => {
     let filtered = [...transactions];
@@ -226,14 +243,23 @@ export default function ExpenseTrackerTab() {
       if (to) filtered = filtered.filter((t) => t.transaction_date <= to);
     }
 
-    // Search filter
+    // Enhanced search filter
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (t) =>
-          t.description?.toLowerCase().includes(query) ||
-          t.category?.name.toLowerCase().includes(query)
-      );
+      const parsed = parseSearchQuery(searchQuery);
+      if (parsed.type === 'date') {
+        filtered = filtered.filter((t) => t.transaction_date === parsed.value);
+      } else {
+        const query = parsed.value;
+        filtered = filtered.filter((t) => {
+          const category = categories.find((c) => c.id === t.category_id);
+          return (
+            t.description?.toLowerCase().includes(query) ||
+            category?.name.toLowerCase().includes(query) ||
+            t.transaction_date.includes(query) ||
+            t.amount.toString().includes(query)
+          );
+        });
+      }
     }
 
     // Category filter
@@ -488,7 +514,7 @@ export default function ExpenseTrackerTab() {
         setError(updateError.message);
         return;
       }
-      setSuccessMessage('Transaction updated successfully!');
+      addNotification('success', 'Transaction updated successfully!');
     } else {
       // Insert
       const { error: insertError } = await supabase
@@ -499,16 +525,25 @@ export default function ExpenseTrackerTab() {
         setError(insertError.message);
         return;
       }
-      setSuccessMessage('Transaction added successfully!');
+      addNotification('success', 'Transaction added successfully!');
     }
 
     // Clear form and close modal after a short delay
     setTimeout(() => {
       closeTransactionModal();
-      setSuccessMessage(null);
     }, 1500);
 
     await loadTransactions();
+  };
+
+  // Notification helper
+  const addNotification = (type: NotificationType, message: string, duration = 4000) => {
+    const id = Date.now().toString();
+    setNotifications((prev) => [...prev, { id, type, message, duration }]);
+  };
+
+  const removeNotification = (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
   // Open delete transaction modal
@@ -548,7 +583,7 @@ export default function ExpenseTrackerTab() {
 
     setShowDeleteTransactionModal(false);
     setTransactionToDelete(null);
-    setSuccessMessage('Transaction deleted successfully!');
+    addNotification('success', 'Transaction deleted successfully!');
     setShowUndoNotification(true);
 
     await loadTransactions();
@@ -597,13 +632,9 @@ export default function ExpenseTrackerTab() {
 
     setShowUndoNotification(false);
     setDeletedTransaction(null);
-    setSuccessMessage('Transaction restored successfully!');
+    addNotification('success', 'Transaction restored successfully!');
 
     await loadTransactions();
-
-    setTimeout(() => {
-      setSuccessMessage(null);
-    }, 2000);
   };
 
   // Open category modal
@@ -703,7 +734,7 @@ export default function ExpenseTrackerTab() {
         return;
       }
       newCategoryId = editingCategory.id;
-      setSuccessMessage('Category updated successfully!');
+      addNotification('success', 'Category updated successfully!');
     } else {
       // Insert
       const { data: insertedData, error: insertError } = await supabase
@@ -717,7 +748,7 @@ export default function ExpenseTrackerTab() {
         return;
       }
       newCategoryId = insertedData?.id || null;
-      setSuccessMessage('Category created successfully!');
+      addNotification('success', 'Category created successfully!');
     }
 
     await loadCategories();
@@ -729,7 +760,6 @@ export default function ExpenseTrackerTab() {
 
     setTimeout(() => {
       closeCategoryModal();
-      setSuccessMessage(null);
     }, 1500);
   };
 
@@ -784,14 +814,10 @@ export default function ExpenseTrackerTab() {
 
     setShowDeleteCategoryModal(false);
     setCategoryToDelete(null);
-    setSuccessMessage('Category deleted successfully!');
+    addNotification('success', 'Category deleted successfully!');
     
     await loadCategories();
     await loadTransactions();
-
-    setTimeout(() => {
-      setSuccessMessage(null);
-    }, 2000);
   };
 
   // Export to CSV
@@ -861,7 +887,7 @@ export default function ExpenseTrackerTab() {
       </div>
 
       {/* Sub-navigation */}
-      <div className="mb-6 flex gap-2 border-b border-slate-200">
+      <div className="mb-6 flex gap-2 border-b border-slate-200 overflow-x-auto scrollbar-hide">
         {(['dashboard', 'monthly', 'yearly', 'categories'] as ExpenseView[]).map((view) => (
           <button
             key={view}
@@ -912,6 +938,7 @@ export default function ExpenseTrackerTab() {
           onEditTransaction={openTransactionModal}
           onDeleteTransaction={handleDeleteTransactionClick}
           onViewAllTransactions={() => setActiveView('monthly')}
+          allTransactions={transactions}
         />
       )}
 
@@ -931,17 +958,9 @@ export default function ExpenseTrackerTab() {
           }}
         />
       )}
-      
-      {/* Clear navigation state after use */}
-      {navigateToMonth && activeView === 'monthly' && (
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `if (typeof window !== 'undefined') { setTimeout(() => { /* Navigation state cleared */ }, 0); }`,
-          }}
-        />
-      )}
 
       {/* Yearly View */}
+      <div role="tabpanel" id="yearly-panel" aria-labelledby="yearly-tab" hidden={activeView !== 'yearly'}>
       {activeView === 'yearly' && (
         <ExpenseYearlyView
           transactions={transactions}
@@ -958,8 +977,10 @@ export default function ExpenseTrackerTab() {
           }}
         />
       )}
+      </div>
 
       {/* Categories View */}
+      <div role="tabpanel" id="categories-panel" aria-labelledby="categories-tab" hidden={activeView !== 'categories'}>
       {activeView === 'categories' && (
         <ExpenseCategoriesView
           categories={categories}
@@ -971,6 +992,7 @@ export default function ExpenseTrackerTab() {
           onDeleteCategory={handleDeleteCategoryClick}
         />
       )}
+      </div>
 
       {/* Transaction Modal */}
       <TransactionModal
@@ -1023,14 +1045,6 @@ export default function ExpenseTrackerTab() {
         }}
         onDelete={handleDeleteTransaction}
       />
-
-      {/* Success Notification */}
-      {successMessage && (
-        <SuccessNotification
-          message={successMessage}
-          onClose={() => setSuccessMessage(null)}
-        />
-      )}
 
       {/* Undo Notification */}
       <UndoNotification

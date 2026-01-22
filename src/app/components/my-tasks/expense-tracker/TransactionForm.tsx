@@ -51,22 +51,26 @@ export default function TransactionForm({
           <button
             type="button"
             onClick={() => onTypeChange('expense')}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+            className={`flex-1 min-h-[44px] rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 ${
               transactionType === 'expense'
                 ? 'bg-red-100 text-red-700'
-                : 'text-slate-600 hover:bg-slate-100'
+                : 'text-slate-600 hover:bg-slate-100 active:bg-slate-200'
             }`}
+            aria-label="Transaction type: Expense"
+            aria-pressed={transactionType === 'expense'}
           >
             Expense
           </button>
           <button
             type="button"
             onClick={() => onTypeChange('income')}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+            className={`flex-1 min-h-[44px] rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 ${
               transactionType === 'income'
                 ? 'bg-emerald-100 text-emerald-700'
-                : 'text-slate-600 hover:bg-slate-100'
+                : 'text-slate-600 hover:bg-slate-100 active:bg-slate-200'
             }`}
+            aria-label="Transaction type: Income"
+            aria-pressed={transactionType === 'income'}
           >
             Income
           </button>
@@ -87,14 +91,20 @@ export default function TransactionForm({
             min="0"
             value={transactionAmount}
             onChange={(e) => onAmountChange(e.target.value)}
-            className={`w-full rounded-lg border ${
+            className={`w-full min-h-[44px] rounded-lg border ${
               errors.amount ? 'border-red-300' : 'border-slate-200'
-            } bg-white pl-8 pr-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none`}
+            } bg-white pl-8 pr-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2`}
             placeholder="0.00"
+            aria-label="Transaction amount"
+            aria-required="true"
+            aria-invalid={!!errors.amount}
+            aria-describedby={errors.amount ? 'amount-error' : undefined}
           />
         </div>
         {errors.amount && (
-          <p className="mt-1 text-xs text-red-600">{errors.amount}</p>
+          <p id="amount-error" className="mt-1 text-xs text-red-600" role="alert">
+            {errors.amount}
+          </p>
         )}
       </div>
 
@@ -125,12 +135,18 @@ export default function TransactionForm({
             value={transactionDate}
             onChange={(e) => onDateChange(e.target.value)}
             max={new Date().toISOString().split('T')[0]}
-            className={`w-full rounded-lg border ${
+            className={`w-full min-h-[44px] rounded-lg border ${
               errors.date ? 'border-red-300' : 'border-slate-200'
-            } bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none`}
+            } bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2`}
+            aria-label="Transaction date"
+            aria-required="true"
+            aria-invalid={!!errors.date}
+            aria-describedby={errors.date ? 'date-error' : undefined}
           />
           {errors.date && (
-            <p className="mt-1 text-xs text-red-600">{errors.date}</p>
+            <p id="date-error" className="mt-1 text-xs text-red-600" role="alert">
+              {errors.date}
+            </p>
           )}
         </div>
         <div>
@@ -142,7 +158,8 @@ export default function TransactionForm({
             type="time"
             value={transactionTime}
             onChange={(e) => onTimeChange(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            className="w-full min-h-[44px] rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+            aria-label="Transaction time (optional)"
           />
         </div>
       </div>
@@ -157,8 +174,9 @@ export default function TransactionForm({
           value={transactionDescription}
           onChange={(e) => onDescriptionChange(e.target.value)}
           rows={3}
-          className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none resize-y"
+          className="w-full min-h-[88px] rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 resize-y"
           placeholder="Why did you spend/earn this?"
+          aria-label="Transaction description (optional)"
         />
       </div>
     </div>
