@@ -6,6 +6,7 @@ import OverviewTab from './OverviewTab';
 import PlansTab from './PlansTab';
 import DocumentsTab from './DocumentsTab';
 import DocumentModal from './DocumentModal';
+import JournalTab from './JournalTab';
 import { DocumentWithUrl, TabId } from './types';
 
 const tabs: {
@@ -22,6 +23,11 @@ const tabs: {
     id: 'plans',
     label: 'Plans',
     description: 'Upcoming milestones, timelines, and commitments.',
+  },
+  {
+    id: 'journal',
+    label: 'Journal',
+    description: 'Capture notes, reflections, and daily logs.',
   },
   {
     id: 'documents',
@@ -42,6 +48,7 @@ export default function MyTasksLayout() {
   const [selectedDoc, setSelectedDoc] = useState<DocumentWithUrl | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [docsLoading, setDocsLoading] = useState(false);
 
   const dateFormatter = useMemo(
     () =>
@@ -61,36 +68,43 @@ export default function MyTasksLayout() {
   };
 
   const fetchDocuments = async () => {
-    const { data, error } = await supabase
-      .from('documents')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(50);
-    if (error) {
-      console.error('Fetch documents error', error);
-      setDocError(error.message);
-      return;
-    }
-    if (!data) {
-      setDocs([]);
-      return;
-    }
+    try {
+      setDocsLoading(true);
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-    const withUrls = await Promise.all(
-      data.map(async (doc) => {
-        const { data: signed, error: signedErr } = await supabase.storage
-          .from('my-docs')
-          .createSignedUrl(doc.file_path, 60 * 60);
-        if (signedErr) {
-          console.error('Signed URL error', signedErr);
-          return { ...doc };
-        }
-        return { ...doc, signedUrl: signed?.signedUrl };
-      })
-    );
+      if (error) {
+        console.error('Fetch documents error', error);
+        setDocError(error.message);
+        return;
+      }
+      if (!data) {
+        setDocs([]);
+        setDocError(null);
+        return;
+      }
 
-    setDocs(withUrls);
-    setDocError(null);
+      const withUrls = await Promise.all(
+        data.map(async (doc) => {
+          const { data: signed, error: signedErr } = await supabase.storage
+            .from('my-docs')
+            .createSignedUrl(doc.file_path, 60 * 60);
+          if (signedErr) {
+            console.error('Signed URL error', signedErr);
+            return { ...doc };
+          }
+          return { ...doc, signedUrl: signed?.signedUrl };
+        })
+      );
+
+      setDocs(withUrls);
+      setDocError(null);
+    } finally {
+      setDocsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -239,12 +253,14 @@ export default function MyTasksLayout() {
   const content = useMemo(() => {
     if (activeTab === 'overview') return <OverviewTab />;
     if (activeTab === 'plans') return <PlansTab />;
+    if (activeTab === 'journal') return <JournalTab />;
     return (
       <DocumentsTab
         title={title}
         description={description}
         search={search}
         uploading={uploading}
+        docsLoading={docsLoading}
         docError={docError}
         filteredDocs={filteredDocs}
         onTitleChange={setTitle}
@@ -262,6 +278,7 @@ export default function MyTasksLayout() {
     description,
     search,
     uploading,
+    docsLoading,
     docError,
     filteredDocs,
     dateFormatter,

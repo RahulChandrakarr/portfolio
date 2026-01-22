@@ -1,6 +1,6 @@
 'use client';
 
-export type TabId = 'overview' | 'plans' | 'documents';
+export type TabId = 'overview' | 'plans' | 'documents' | 'journal';
 
 export type DocumentRow = {
   id: string;

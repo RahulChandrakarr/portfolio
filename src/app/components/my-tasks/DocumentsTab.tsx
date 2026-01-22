@@ -7,6 +7,7 @@ type Props = {
   description: string;
   search: string;
   uploading: boolean;
+  docsLoading: boolean;
   docError: string | null;
   filteredDocs: DocumentWithUrl[];
   onTitleChange: (v: string) => void;
@@ -23,6 +24,7 @@ export default function DocumentsTab({
   description,
   search,
   uploading,
+  docsLoading,
   docError,
   filteredDocs,
   onTitleChange,
@@ -102,7 +104,30 @@ export default function DocumentsTab({
       )}
 
       <div className="mt-6">
-        {filteredDocs.length === 0 ? (
+        {docsLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="flex h-full flex-col overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm"
+              >
+                <div className="h-40 bg-slate-100 animate-pulse" />
+                <div className="flex flex-1 flex-col gap-2 p-4">
+                  <div className="space-y-2">
+                    <div className="h-3 w-2/3 rounded bg-slate-100" />
+                    <div className="h-3 w-full rounded bg-slate-100" />
+                    <div className="h-3 w-1/2 rounded bg-slate-100" />
+                  </div>
+                  <div className="mt-2 flex gap-2">
+                    <div className="h-7 flex-1 rounded bg-slate-100" />
+                    <div className="h-7 flex-1 rounded bg-slate-100" />
+                    <div className="h-7 w-8 rounded bg-slate-100" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredDocs.length === 0 ? (
           <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm text-slate-600">
             No documents yet. Upload a PDF or image to get started.
           </div>
