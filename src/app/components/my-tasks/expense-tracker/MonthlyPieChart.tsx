@@ -36,7 +36,7 @@ export default function MonthlyPieChart({
       <div className="flex items-center justify-center">
         <div className="relative w-48 h-48 md:w-64 md:h-64">
           <svg viewBox="0 0 100 100" className="transform -rotate-90">
-            {topCategories.map((item, index) => {
+            {topCategories.map((item) => {
               const percentage = item.percentage;
               const angle = (percentage / 100) * 360;
               const largeArc = percentage > 50 ? 1 : 0;

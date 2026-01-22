@@ -20,7 +20,6 @@ export default function MonthlyTransactionsList({
   transactions,
   categories,
   currencyFormatter,
-  dateFormatter,
   onEdit,
   onDelete,
   onDuplicate,
@@ -77,8 +76,9 @@ export default function MonthlyTransactionsList({
   }, [sortedTransactions, groupBy, categories]);
 
   // Paginate
-  const allItems = Object.entries(groupedTransactions).flatMap(([key, items]) =>
-    groupBy !== 'none' ? [{ type: 'header', key } as any, ...items] : items
+  type PaginatedItem = ExpenseTransaction | { type: 'header'; key: string };
+  const allItems: PaginatedItem[] = Object.entries(groupedTransactions).flatMap(([key, items]) =>
+    groupBy !== 'none' ? [{ type: 'header' as const, key }, ...items] : items
   );
   const totalPages = Math.ceil(allItems.length / itemsPerPage);
   const paginatedItems = allItems.slice(
@@ -185,8 +185,8 @@ export default function MonthlyTransactionsList({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {paginatedItems.map((item: any, index: number) => {
-                if (item.type === 'header') {
+              {paginatedItems.map((item, index: number) => {
+                if ('type' in item && item.type === 'header') {
                   return (
                     <tr key={`header-${item.key}-${index}`} className="bg-slate-100">
                       <td colSpan={6} className="px-4 py-2">

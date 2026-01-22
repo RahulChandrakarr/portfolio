@@ -11,15 +11,11 @@ import MonthCard from './MonthCard';
 import YearlyFilters from './YearlyFilters';
 import YearlyAnalysis from './YearlyAnalysis';
 import SearchBar from './SearchBar';
-import ExportButton from './ExportButton';
 
 type ExpenseYearlyViewProps = {
   transactions: ExpenseTransaction[];
   categories: ExpenseCategory[];
   currencyFormatter: Intl.NumberFormat;
-  dateFormatter: Intl.DateTimeFormat;
-  onEditTransaction: (transaction: ExpenseTransaction) => void;
-  onDeleteTransaction: (transaction: ExpenseTransaction) => void;
   onNavigateToMonth: (year: number, month: number) => void;
 };
 
@@ -27,9 +23,6 @@ export default function ExpenseYearlyView({
   transactions,
   categories,
   currencyFormatter,
-  dateFormatter,
-  onEditTransaction,
-  onDeleteTransaction,
   onNavigateToMonth,
 }: ExpenseYearlyViewProps) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -54,8 +47,6 @@ export default function ExpenseYearlyView({
 
   // Get previous year for comparison
   const previousYear = currentYear - 1;
-  const prevYearStart = new Date(previousYear, 0, 1);
-  const prevYearEnd = new Date(previousYear, 11, 31, 23, 59, 59, 999);
 
   // Filter transactions for current year
   const yearTransactions = useMemo(() => {
@@ -67,11 +58,13 @@ export default function ExpenseYearlyView({
 
   // Filter transactions for previous year
   const prevYearTransactions = useMemo(() => {
+    const prevYearStart = new Date(previousYear, 0, 1);
+    const prevYearEnd = new Date(previousYear, 11, 31, 23, 59, 59, 999);
     return transactions.filter((t) => {
       const tDate = new Date(t.transaction_date);
       return tDate >= prevYearStart && tDate <= prevYearEnd;
     });
-  }, [transactions, prevYearStart, prevYearEnd]);
+  }, [transactions, previousYear]);
 
   // Apply filters
   const filteredTransactions = useMemo(() => {

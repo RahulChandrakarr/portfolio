@@ -1,7 +1,5 @@
 'use client';
 
-import { ExpenseTransaction } from '../types';
-
 type MonthlyBarChartProps = {
   dailyData: { date: string; amount: number }[];
   currencyFormatter: Intl.NumberFormat;

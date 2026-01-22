@@ -13,7 +13,6 @@ type MonthCardProps = {
 
 export default function MonthCard({
   monthName,
-  monthNumber,
   income,
   expenses,
   net,

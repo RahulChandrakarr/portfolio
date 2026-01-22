@@ -10,7 +10,6 @@ import CategoryBreakdownTable from './CategoryBreakdownTable';
 import MonthlyFilters from './MonthlyFilters';
 import MonthlyTransactionsList from './MonthlyTransactionsList';
 import SearchBar from './SearchBar';
-import ExportButton from './ExportButton';
 
 type ExpenseMonthlyViewProps = {
   transactions: ExpenseTransaction[];

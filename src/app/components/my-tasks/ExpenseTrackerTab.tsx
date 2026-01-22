@@ -17,8 +17,7 @@ import CategoryModal from './expense-tracker/CategoryModal';
 import DeleteCategoryModal from './expense-tracker/DeleteCategoryModal';
 import DeleteTransactionModal from './expense-tracker/DeleteTransactionModal';
 import UndoNotification from './expense-tracker/UndoNotification';
-import NotificationSystem, { Notification, NotificationType } from './expense-tracker/NotificationSystem';
-import { useKeyboardShortcuts } from './expense-tracker/useKeyboardShortcuts';
+import { NotificationType } from './expense-tracker/NotificationSystem';
 import { PeriodType } from './expense-tracker/PeriodSelector';
 
 // Default categories with icons and colors
@@ -71,8 +70,7 @@ export default function ExpenseTrackerTab() {
   const [transactionToDelete, setTransactionToDelete] = useState<ExpenseTransaction | null>(null);
   const [deletedTransaction, setDeletedTransaction] = useState<ExpenseTransaction | null>(null);
   const [showUndoNotification, setShowUndoNotification] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const searchInputRef = useState<HTMLInputElement | null>(null)[0];
+  const [, setNotifications] = useState<{ id: string; type: NotificationType; message: string; duration: number }[]>([]);
 
   // Period selector state
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('today');
@@ -169,7 +167,7 @@ export default function ExpenseTrackerTab() {
       }
 
       // Ensure data is properly formatted
-      const formattedData = (data || []).map((t: any) => {
+      const formattedData = (data || []).map((t: ExpenseTransaction) => {
         // Normalize transaction_date to YYYY-MM-DD format
         let normalizedDate = t.transaction_date;
         if (normalizedDate) {
@@ -182,7 +180,7 @@ export default function ExpenseTrackerTab() {
             try {
               const date = new Date(normalizedDate);
               normalizedDate = date.toISOString().split('T')[0];
-            } catch (e) {
+            } catch {
               console.warn('Could not parse date:', normalizedDate);
             }
           }
@@ -530,41 +528,41 @@ export default function ExpenseTrackerTab() {
       expensesChangePercent,
       netChangePercent,
     };
-  }, [filteredTransactions, previousPeriodTransactions]);
+  }, [filteredTransactions, previousPeriodTransactions, selectedPeriod, getPeriodDateRange]);
 
-  // Monthly breakdown
-  const monthlyBreakdown = useMemo(() => {
-    const breakdown: { [key: string]: { income: number; expense: number } } = {};
-    filteredTransactions.forEach((t) => {
-      const month = t.transaction_date.substring(0, 7); // YYYY-MM
-      if (!breakdown[month]) {
-        breakdown[month] = { income: 0, expense: 0 };
-      }
-      if (t.type === 'income') {
-        breakdown[month].income += t.amount;
-      } else {
-        breakdown[month].expense += t.amount;
-      }
-    });
-    return breakdown;
-  }, [filteredTransactions]);
+  // Monthly breakdown (kept for potential future use)
+  // const monthlyBreakdown = useMemo(() => {
+  //   const breakdown: { [key: string]: { income: number; expense: number } } = {};
+  //   filteredTransactions.forEach((t) => {
+  //     const month = t.transaction_date.substring(0, 7); // YYYY-MM
+  //     if (!breakdown[month]) {
+  //       breakdown[month] = { income: 0, expense: 0 };
+  //     }
+  //     if (t.type === 'income') {
+  //       breakdown[month].income += t.amount;
+  //     } else {
+  //       breakdown[month].expense += t.amount;
+  //     }
+  //   });
+  //   return breakdown;
+  // }, [filteredTransactions]);
 
-  // Yearly breakdown
-  const yearlyBreakdown = useMemo(() => {
-    const breakdown: { [key: string]: { income: number; expense: number } } = {};
-    filteredTransactions.forEach((t) => {
-      const year = t.transaction_date.substring(0, 4); // YYYY
-      if (!breakdown[year]) {
-        breakdown[year] = { income: 0, expense: 0 };
-      }
-      if (t.type === 'income') {
-        breakdown[year].income += t.amount;
-      } else {
-        breakdown[year].expense += t.amount;
-      }
-    });
-    return breakdown;
-  }, [filteredTransactions]);
+  // Yearly breakdown (kept for potential future use)
+  // const yearlyBreakdown = useMemo(() => {
+  //   const breakdown: { [key: string]: { income: number; expense: number } } = {};
+  //   filteredTransactions.forEach((t) => {
+  //     const year = t.transaction_date.substring(0, 4); // YYYY
+  //     if (!breakdown[year]) {
+  //       breakdown[year] = { income: 0, expense: 0 };
+  //     }
+  //     if (t.type === 'income') {
+  //       breakdown[year].income += t.amount;
+  //     } else {
+  //       breakdown[year].expense += t.amount;
+  //     }
+  //   });
+  //   return breakdown;
+  // }, [filteredTransactions]);
 
   // Category breakdown
   const categoryBreakdown = useMemo(() => {
@@ -710,9 +708,9 @@ export default function ExpenseTrackerTab() {
     setNotifications((prev) => [...prev, { id, type, message, duration }]);
   };
 
-  const removeNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
+  // const removeNotification = (id: string) => {
+  //   setNotifications((prev) => prev.filter((n) => n.id !== id));
+  // };
 
   // Open delete transaction modal
   const handleDeleteTransactionClick = (transaction: ExpenseTransaction) => {
@@ -1095,7 +1093,6 @@ export default function ExpenseTrackerTab() {
           filterAmountMin={filterAmountMin}
           filterAmountMax={filterAmountMax}
           currencyFormatter={currencyFormatter}
-          dateFormatter={dateFormatter}
           onPeriodChange={setSelectedPeriod}
           onSearchChange={setSearchQuery}
           onCategoryChange={setFilterCategory}
@@ -1134,9 +1131,6 @@ export default function ExpenseTrackerTab() {
           transactions={transactions}
           categories={categories}
           currencyFormatter={currencyFormatter}
-          dateFormatter={dateFormatter}
-          onEditTransaction={openTransactionModal}
-          onDeleteTransaction={handleDeleteTransactionClick}
           onNavigateToMonth={(year, month) => {
             setNavigateToMonth({ year, month });
             setActiveView('monthly');

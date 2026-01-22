@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import OverviewTab from './OverviewTab';
 import PlansTab from './PlansTab';
@@ -73,7 +73,7 @@ export default function MyTasksLayout() {
     return `${(bytes / 1024 ** i).toFixed(1)} ${units[i]}`;
   };
 
-  const fetchDocuments = async () => {
+  const fetchDocuments = useCallback(async () => {
     try {
       setDocsLoading(true);
       const { data, error } = await supabase
@@ -111,7 +111,7 @@ export default function MyTasksLayout() {
     } finally {
       setDocsLoading(false);
     }
-  };
+  }, [supabase]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -125,7 +125,7 @@ export default function MyTasksLayout() {
     if (activeTab === 'documents') {
       fetchDocuments();
     }
-  }, [activeTab]);
+  }, [activeTab, fetchDocuments]);
 
   const handleTabChange = (tabId: TabId) => {
     setActiveTab(tabId);
@@ -136,7 +136,7 @@ export default function MyTasksLayout() {
     }
   };
 
-  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!title.trim()) {
@@ -193,7 +193,7 @@ export default function MyTasksLayout() {
     setTitle('');
     setDescription('');
     setUploading(false);
-  };
+  }, [supabase, title, description, fetchDocuments]);
 
   const filteredDocs = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -289,6 +289,7 @@ export default function MyTasksLayout() {
     filteredDocs,
     dateFormatter,
     docsLoading,
+    handleUpload,
   ]);
 
   return (

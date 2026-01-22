@@ -15,7 +15,6 @@ export default function YearlyNavigation({
   onSelectYear,
   onQuickSelect,
 }: YearlyNavigationProps) {
-  const currentDate = new Date();
   const years = [];
   for (let i = currentYear - 5; i <= currentYear + 2; i++) {
     years.push(i);

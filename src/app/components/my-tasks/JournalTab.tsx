@@ -151,7 +151,7 @@ export default function JournalTab() {
       }
 
       const mapped: JournalEntry[] =
-        data?.map((row: any) => ({
+        data?.map((row: { id: string; title: string; body_html: string | null; category: string; created_at: string }) => ({
           id: row.id,
           title: row.title,
           body_html: row.body_html ?? '',
@@ -198,7 +198,7 @@ export default function JournalTab() {
       }
 
       const mapped: JournalEntry[] =
-        data?.map((row: any) => ({
+        data?.map((row: { id: string; title: string; body_html: string | null; category: string; created_at: string }) => ({
           id: row.id,
           title: row.title,
           body_html: row.body_html ?? '',

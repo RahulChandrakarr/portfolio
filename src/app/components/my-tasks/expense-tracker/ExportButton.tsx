@@ -13,7 +13,6 @@ type ExportButtonProps = {
 export default function ExportButton({
   transactions,
   categories,
-  currencyFormatter,
   fileName,
   disabled = false,
 }: ExportButtonProps) {

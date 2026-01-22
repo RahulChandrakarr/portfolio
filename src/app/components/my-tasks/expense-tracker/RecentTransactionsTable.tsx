@@ -6,7 +6,6 @@ type RecentTransactionsTableProps = {
   transactions: ExpenseTransaction[];
   categories: ExpenseCategory[];
   loading: boolean;
-  dateFormatter: Intl.DateTimeFormat;
   currencyFormatter: Intl.NumberFormat;
   onEdit: (transaction: ExpenseTransaction) => void;
   onDelete: (transaction: ExpenseTransaction) => void;
@@ -17,7 +16,6 @@ export default function RecentTransactionsTable({
   transactions,
   categories,
   loading,
-  dateFormatter,
   currencyFormatter,
   onEdit,
   onDelete,

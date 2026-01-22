@@ -1,14 +1,9 @@
 'use client';
 
 import { ExpenseTransaction, ExpenseCategory } from '../types';
-import SummaryCards from './SummaryCards';
 import ExpenseFilters from './ExpenseFilters';
-import SearchBar from './SearchBar';
-import ExportButton from './ExportButton';
 import RecentTransactionsTable from './RecentTransactionsTable';
-import MobileTransactionCard from './MobileTransactionCard';
-import CategoryBreakdown from './CategoryBreakdown';
-import PeriodSelector, { PeriodType } from './PeriodSelector';
+import { PeriodType } from './PeriodSelector';
 
 type ExpenseDashboardViewProps = {
   summary: {
@@ -35,7 +30,6 @@ type ExpenseDashboardViewProps = {
   filterAmountMin: string;
   filterAmountMax: string;
   currencyFormatter: Intl.NumberFormat;
-  dateFormatter: Intl.DateTimeFormat;
   onPeriodChange: (period: PeriodType) => void;
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
@@ -50,13 +44,9 @@ type ExpenseDashboardViewProps = {
 };
 
 export default function ExpenseDashboardView({
-  summary,
   recentTransactions,
-  categoryBreakdown,
   categories,
   loading,
-  selectedPeriod,
-  dateRangeLabel,
   searchQuery,
   filterCategory,
   filterDateFrom,
@@ -64,8 +54,6 @@ export default function ExpenseDashboardView({
   filterAmountMin,
   filterAmountMax,
   currencyFormatter,
-  dateFormatter,
-  onPeriodChange,
   onSearchChange,
   onCategoryChange,
   onDateFromChange,
@@ -143,7 +131,6 @@ export default function ExpenseDashboardView({
           transactions={recentTransactions}
           categories={categories}
           loading={loading}
-          dateFormatter={dateFormatter}
           currencyFormatter={currencyFormatter}
           onEdit={onEditTransaction}
           onDelete={onDeleteTransaction}
