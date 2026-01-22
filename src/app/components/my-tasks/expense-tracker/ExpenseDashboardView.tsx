@@ -3,15 +3,28 @@
 import { ExpenseTransaction, ExpenseCategory } from '../types';
 import SummaryCards from './SummaryCards';
 import ExpenseFilters from './ExpenseFilters';
-import TransactionList from './TransactionList';
+import RecentTransactionsTable from './RecentTransactionsTable';
 import CategoryBreakdown from './CategoryBreakdown';
+import PeriodSelector, { PeriodType } from './PeriodSelector';
 
 type ExpenseDashboardViewProps = {
-  summary: { income: number; expenses: number; net: number };
+  summary: {
+    income: number;
+    expenses: number;
+    net: number;
+    incomeChange?: number;
+    expensesChange?: number;
+    netChange?: number;
+    incomeChangePercent?: number;
+    expensesChangePercent?: number;
+    netChangePercent?: number;
+  };
   recentTransactions: ExpenseTransaction[];
   categoryBreakdown: { [key: string]: number };
   categories: ExpenseCategory[];
   loading: boolean;
+  selectedPeriod: PeriodType;
+  dateRangeLabel: string;
   searchQuery: string;
   filterCategory: string;
   filterDateFrom: string;
@@ -20,6 +33,7 @@ type ExpenseDashboardViewProps = {
   filterAmountMax: string;
   currencyFormatter: Intl.NumberFormat;
   dateFormatter: Intl.DateTimeFormat;
+  onPeriodChange: (period: PeriodType) => void;
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
   onDateFromChange: (value: string) => void;
@@ -28,6 +42,7 @@ type ExpenseDashboardViewProps = {
   onAmountMaxChange: (value: string) => void;
   onEditTransaction: (transaction: ExpenseTransaction) => void;
   onDeleteTransaction: (id: string) => void;
+  onViewAllTransactions?: () => void;
 };
 
 export default function ExpenseDashboardView({
@@ -36,6 +51,8 @@ export default function ExpenseDashboardView({
   categoryBreakdown,
   categories,
   loading,
+  selectedPeriod,
+  dateRangeLabel,
   searchQuery,
   filterCategory,
   filterDateFrom,
@@ -44,6 +61,7 @@ export default function ExpenseDashboardView({
   filterAmountMax,
   currencyFormatter,
   dateFormatter,
+  onPeriodChange,
   onSearchChange,
   onCategoryChange,
   onDateFromChange,
@@ -52,16 +70,47 @@ export default function ExpenseDashboardView({
   onAmountMaxChange,
   onEditTransaction,
   onDeleteTransaction,
+  onViewAllTransactions,
 }: ExpenseDashboardViewProps) {
   return (
     <div className="space-y-6">
+      {/* Period Selector */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs text-slate-500 mb-1">Focus Period</p>
+          <PeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={onPeriodChange} />
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-slate-500">Date Range</p>
+          <p className="text-sm font-medium text-slate-700">{dateRangeLabel}</p>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
       <SummaryCards
         income={summary.income}
         expenses={summary.expenses}
         net={summary.net}
+        incomeChange={summary.incomeChange}
+        expensesChange={summary.expensesChange}
+        netChange={summary.netChange}
+        incomeChangePercent={summary.incomeChangePercent}
+        expensesChangePercent={summary.expensesChangePercent}
+        netChangePercent={summary.netChangePercent}
         currencyFormatter={currencyFormatter}
       />
 
+      {/* Quick Chart Section */}
+      <div>
+        <h3 className="mb-4 text-lg font-semibold text-slate-900">Spending by Category</h3>
+        <CategoryBreakdown
+          categoryBreakdown={categoryBreakdown}
+          categories={categories}
+          currencyFormatter={currencyFormatter}
+        />
+      </div>
+
+      {/* Filters */}
       <ExpenseFilters
         searchQuery={searchQuery}
         filterCategory={filterCategory}
@@ -78,9 +127,13 @@ export default function ExpenseDashboardView({
         onAmountMaxChange={onAmountMaxChange}
       />
 
+      {/* Recent Transactions */}
       <div>
-        <h3 className="mb-4 text-lg font-semibold text-slate-900">Recent Transactions</h3>
-        <TransactionList
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-slate-900">Recent Transactions</h3>
+          <p className="text-xs text-slate-500">Last {recentTransactions.length} transactions</p>
+        </div>
+        <RecentTransactionsTable
           transactions={recentTransactions}
           categories={categories}
           loading={loading}
@@ -88,15 +141,7 @@ export default function ExpenseDashboardView({
           currencyFormatter={currencyFormatter}
           onEdit={onEditTransaction}
           onDelete={onDeleteTransaction}
-        />
-      </div>
-
-      <div>
-        <h3 className="mb-4 text-lg font-semibold text-slate-900">Spending by Category</h3>
-        <CategoryBreakdown
-          categoryBreakdown={categoryBreakdown}
-          categories={categories}
-          currencyFormatter={currencyFormatter}
+          onViewAll={onViewAllTransactions}
         />
       </div>
     </div>

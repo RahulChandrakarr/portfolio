@@ -108,7 +108,7 @@ export default function TransactionModal({
               min="0"
               value={transactionAmount}
               onChange={(e) => onAmountChange(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-slate-400 focus:outline-none"
+              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
               placeholder="0.00"
             />
           </div>
@@ -119,7 +119,7 @@ export default function TransactionModal({
             <select
               value={transactionCategory}
               onChange={(e) => onCategoryChange(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-slate-400 focus:outline-none"
+              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
             >
               <option value="">Select a category</option>
               {getCategoriesByType(transactionType).map((cat) => (
@@ -137,7 +137,7 @@ export default function TransactionModal({
               type="date"
               value={transactionDate}
               onChange={(e) => onDateChange(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-slate-400 focus:outline-none"
+              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
             />
           </div>
 
@@ -150,7 +150,7 @@ export default function TransactionModal({
               value={transactionDescription}
               onChange={(e) => onDescriptionChange(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-slate-400 focus:outline-none resize-y"
+              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none resize-y"
               placeholder="Add a note about this transaction..."
             />
           </div>

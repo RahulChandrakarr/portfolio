@@ -96,7 +96,7 @@ export default function CategoryModal({
               type="text"
               value={categoryName}
               onChange={(e) => onNameChange(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-slate-400 focus:outline-none"
+              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
               placeholder="Category name"
             />
           </div>
@@ -108,7 +108,7 @@ export default function CategoryModal({
               type="text"
               value={categoryIcon}
               onChange={(e) => onIconChange(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-slate-400 focus:outline-none"
+              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
               placeholder="💰"
               maxLength={2}
             />
@@ -129,7 +129,7 @@ export default function CategoryModal({
                 type="text"
                 value={categoryColor}
                 onChange={(e) => onColorChange(e.target.value)}
-                className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-slate-400 focus:outline-none"
+                className="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
                 placeholder="#3B82F6"
               />
             </div>

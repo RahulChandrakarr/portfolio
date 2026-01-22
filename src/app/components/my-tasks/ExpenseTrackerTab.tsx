@@ -14,6 +14,7 @@ import ExpenseYearlyView from './expense-tracker/ExpenseYearlyView';
 import ExpenseCategoriesView from './expense-tracker/ExpenseCategoriesView';
 import TransactionModal from './expense-tracker/TransactionModal';
 import CategoryModal from './expense-tracker/CategoryModal';
+import { PeriodType } from './expense-tracker/PeriodSelector';
 
 // Default categories with icons and colors
 const defaultCategories: Omit<ExpenseCategory, 'id' | 'user_id' | 'created_at'>[] = [
@@ -55,6 +56,9 @@ export default function ExpenseTrackerTab() {
   const [categoryColor, setCategoryColor] = useState('#3B82F6');
   const [categoryIcon, setCategoryIcon] = useState('💰');
   const [categoryType, setCategoryType] = useState<TransactionType>('expense');
+
+  // Period selector state
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('this_month');
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -163,9 +167,49 @@ export default function ExpenseTrackerTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Get date range based on period
+  const getPeriodDateRange = useMemo(() => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    switch (selectedPeriod) {
+      case 'this_month': {
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        return {
+          from: firstDay.toISOString().split('T')[0],
+          to: today.toISOString().split('T')[0],
+          label: `${firstDay.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
+        };
+      }
+      case 'last_30_days': {
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        return {
+          from: thirtyDaysAgo.toISOString().split('T')[0],
+          to: today.toISOString().split('T')[0],
+          label: `${thirtyDaysAgo.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
+        };
+      }
+      case 'all_time':
+      default:
+        return {
+          from: '',
+          to: '',
+          label: 'All Time',
+        };
+    }
+  }, [selectedPeriod]);
+
   // Filtered transactions
   const filteredTransactions = useMemo(() => {
     let filtered = [...transactions];
+
+    // Period filter
+    if (selectedPeriod !== 'all_time') {
+      const { from, to } = getPeriodDateRange;
+      if (from) filtered = filtered.filter((t) => t.transaction_date >= from);
+      if (to) filtered = filtered.filter((t) => t.transaction_date <= to);
+    }
 
     // Search filter
     if (searchQuery.trim()) {
@@ -182,7 +226,7 @@ export default function ExpenseTrackerTab() {
       filtered = filtered.filter((t) => t.category_id === filterCategory);
     }
 
-    // Date range filter
+    // Date range filter (manual override)
     if (filterDateFrom) {
       filtered = filtered.filter((t) => t.transaction_date >= filterDateFrom);
     }
@@ -203,6 +247,8 @@ export default function ExpenseTrackerTab() {
     return filtered;
   }, [
     transactions,
+    selectedPeriod,
+    getPeriodDateRange,
     searchQuery,
     filterCategory,
     filterDateFrom,
@@ -211,7 +257,39 @@ export default function ExpenseTrackerTab() {
     filterAmountMax,
   ]);
 
-  // Calculate summary statistics
+  // Get previous period transactions for comparison
+  const previousPeriodTransactions = useMemo(() => {
+    const now = new Date();
+    let from: string;
+    let to: string;
+
+    switch (selectedPeriod) {
+      case 'this_month': {
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+        from = lastMonth.toISOString().split('T')[0];
+        to = lastMonthEnd.toISOString().split('T')[0];
+        break;
+      }
+      case 'last_30_days': {
+        const sixtyDaysAgo = new Date(now);
+        sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+        const thirtyDaysAgo = new Date(now);
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        from = sixtyDaysAgo.toISOString().split('T')[0];
+        to = thirtyDaysAgo.toISOString().split('T')[0];
+        break;
+      }
+      default:
+        return [];
+    }
+
+    return transactions.filter(
+      (t) => t.transaction_date >= from && t.transaction_date <= to
+    );
+  }, [transactions, selectedPeriod]);
+
+  // Calculate summary statistics with month-over-month comparison
   const summary = useMemo(() => {
     const income = filteredTransactions
       .filter((t) => t.type === 'income')
@@ -221,8 +299,37 @@ export default function ExpenseTrackerTab() {
       .reduce((sum, t) => sum + t.amount, 0);
     const net = income - expenses;
 
-    return { income, expenses, net };
-  }, [filteredTransactions]);
+    // Previous period calculations
+    const prevIncome = previousPeriodTransactions
+      .filter((t) => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const prevExpenses = previousPeriodTransactions
+      .filter((t) => t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const prevNet = prevIncome - prevExpenses;
+
+    // Calculate changes
+    const incomeChange = income - prevIncome;
+    const expensesChange = expenses - prevExpenses;
+    const netChange = net - prevNet;
+
+    // Calculate percentages
+    const incomeChangePercent = prevIncome > 0 ? (incomeChange / prevIncome) * 100 : 0;
+    const expensesChangePercent = prevExpenses > 0 ? (expensesChange / prevExpenses) * 100 : 0;
+    const netChangePercent = prevNet !== 0 ? (netChange / Math.abs(prevNet)) * 100 : 0;
+
+    return {
+      income,
+      expenses,
+      net,
+      incomeChange,
+      expensesChange,
+      netChange,
+      incomeChangePercent,
+      expensesChangePercent,
+      netChangePercent,
+    };
+  }, [filteredTransactions, previousPeriodTransactions]);
 
   // Monthly breakdown
   const monthlyBreakdown = useMemo(() => {
@@ -517,9 +624,16 @@ export default function ExpenseTrackerTab() {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Expense Tracker
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Expense Tracker
+              </p>
+              {activeView === 'dashboard' && (
+                <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">
+                  {getPeriodDateRange.label}
+                </span>
+              )}
+            </div>
             <h2 className="mt-2 text-xl font-semibold text-slate-900">
               Track Your Finances
             </h2>
@@ -578,6 +692,8 @@ export default function ExpenseTrackerTab() {
           categoryBreakdown={categoryBreakdown}
           categories={categories}
           loading={loading}
+          selectedPeriod={selectedPeriod}
+          dateRangeLabel={getPeriodDateRange.label}
           searchQuery={searchQuery}
           filterCategory={filterCategory}
           filterDateFrom={filterDateFrom}
@@ -586,6 +702,7 @@ export default function ExpenseTrackerTab() {
           filterAmountMax={filterAmountMax}
           currencyFormatter={currencyFormatter}
           dateFormatter={dateFormatter}
+          onPeriodChange={setSelectedPeriod}
           onSearchChange={setSearchQuery}
           onCategoryChange={setFilterCategory}
           onDateFromChange={setFilterDateFrom}
@@ -594,6 +711,7 @@ export default function ExpenseTrackerTab() {
           onAmountMaxChange={setFilterAmountMax}
           onEditTransaction={openTransactionModal}
           onDeleteTransaction={handleDeleteTransaction}
+          onViewAllTransactions={() => setActiveView('monthly')}
         />
       )}
 
