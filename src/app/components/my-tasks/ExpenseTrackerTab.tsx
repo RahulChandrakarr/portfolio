@@ -14,6 +14,7 @@ import ExpenseYearlyView from './expense-tracker/ExpenseYearlyView';
 import ExpenseCategoriesView from './expense-tracker/ExpenseCategoriesView';
 import TransactionModal from './expense-tracker/TransactionModal';
 import CategoryModal from './expense-tracker/CategoryModal';
+import SuccessNotification from './expense-tracker/SuccessNotification';
 import { PeriodType } from './expense-tracker/PeriodSelector';
 
 // Default categories with icons and colors
@@ -48,6 +49,8 @@ export default function ExpenseTrackerTab() {
   const [transactionDate, setTransactionDate] = useState(
     new Date().toISOString().split('T')[0]
   );
+  const [transactionTime, setTransactionTime] = useState('');
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Category modal state
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -56,6 +59,7 @@ export default function ExpenseTrackerTab() {
   const [categoryColor, setCategoryColor] = useState('#3B82F6');
   const [categoryIcon, setCategoryIcon] = useState('💰');
   const [categoryType, setCategoryType] = useState<TransactionType>('expense');
+  const [categoryModalFromTransaction, setCategoryModalFromTransaction] = useState(false);
 
   // Period selector state
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('this_month');
@@ -390,6 +394,11 @@ export default function ExpenseTrackerTab() {
       setTransactionCategory(transaction.category_id);
       setTransactionDescription(transaction.description || '');
       setTransactionDate(transaction.transaction_date);
+      // Extract time if available (assuming format YYYY-MM-DD HH:MM:SS)
+      const dateTime = new Date(transaction.created_at);
+      const hours = String(dateTime.getHours()).padStart(2, '0');
+      const minutes = String(dateTime.getMinutes()).padStart(2, '0');
+      setTransactionTime(`${hours}:${minutes}`);
     } else {
       setEditingTransaction(null);
       setTransactionType('expense');
@@ -397,6 +406,10 @@ export default function ExpenseTrackerTab() {
       setTransactionCategory('');
       setTransactionDescription('');
       setTransactionDate(new Date().toISOString().split('T')[0]);
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      setTransactionTime(`${hours}:${minutes}`);
     }
     setShowTransactionModal(true);
   };
@@ -410,24 +423,25 @@ export default function ExpenseTrackerTab() {
     setTransactionCategory('');
     setTransactionDescription('');
     setTransactionDate(new Date().toISOString().split('T')[0]);
+    setTransactionTime('');
   };
 
   // Save transaction
   const handleSaveTransaction = async () => {
-    if (!transactionAmount || parseFloat(transactionAmount) <= 0) {
-      setError('Please enter a valid amount');
-      return;
-    }
-    if (!transactionCategory) {
-      setError('Please select a category');
-      return;
-    }
-
     setError(null);
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError || !userData?.user) {
       setError('You must be signed in to save transactions.');
       return;
+    }
+
+    // Combine date and time if time is provided
+    let finalDate = transactionDate;
+    if (transactionTime) {
+      const [hours, minutes] = transactionTime.split(':');
+      const dateWithTime = new Date(transactionDate);
+      dateWithTime.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+      finalDate = dateWithTime.toISOString().split('T')[0];
     }
 
     const transactionData = {
@@ -436,7 +450,7 @@ export default function ExpenseTrackerTab() {
       amount: parseFloat(transactionAmount),
       category_id: transactionCategory,
       description: transactionDescription.trim() || null,
-      transaction_date: transactionDate,
+      transaction_date: finalDate,
     };
 
     if (editingTransaction) {
@@ -451,6 +465,7 @@ export default function ExpenseTrackerTab() {
         setError(updateError.message);
         return;
       }
+      setSuccessMessage('Transaction updated successfully!');
     } else {
       // Insert
       const { error: insertError } = await supabase
@@ -461,9 +476,15 @@ export default function ExpenseTrackerTab() {
         setError(insertError.message);
         return;
       }
+      setSuccessMessage('Transaction added successfully!');
     }
 
-    closeTransactionModal();
+    // Clear form and close modal after a short delay
+    setTimeout(() => {
+      closeTransactionModal();
+      setSuccessMessage(null);
+    }, 1500);
+
     await loadTransactions();
   };
 
@@ -492,7 +513,7 @@ export default function ExpenseTrackerTab() {
   };
 
   // Open category modal
-  const openCategoryModal = (category?: ExpenseCategory) => {
+  const openCategoryModal = (category?: ExpenseCategory, fromTransaction = false) => {
     if (category) {
       setEditingCategory(category);
       setCategoryName(category.name);
@@ -504,19 +525,28 @@ export default function ExpenseTrackerTab() {
       setCategoryName('');
       setCategoryColor('#3B82F6');
       setCategoryIcon('💰');
-      setCategoryType('expense');
+      // If opened from transaction modal, use the transaction type
+      setCategoryType(fromTransaction ? transactionType : 'expense');
     }
+    setCategoryModalFromTransaction(fromTransaction);
     setShowCategoryModal(true);
   };
 
   // Close category modal
   const closeCategoryModal = () => {
+    const wasFromTransaction = categoryModalFromTransaction;
     setShowCategoryModal(false);
     setEditingCategory(null);
     setCategoryName('');
     setCategoryColor('#3B82F6');
     setCategoryIcon('💰');
     setCategoryType('expense');
+    setCategoryModalFromTransaction(false);
+    
+    // If opened from transaction modal, reopen transaction modal
+    if (wasFromTransaction) {
+      setShowTransactionModal(true);
+    }
   };
 
   // Save category
@@ -541,6 +571,8 @@ export default function ExpenseTrackerTab() {
       type: categoryType,
     };
 
+    let newCategoryId: string | null = null;
+
     if (editingCategory) {
       // Update
       const { error: updateError } = await supabase
@@ -553,20 +585,30 @@ export default function ExpenseTrackerTab() {
         setError(updateError.message);
         return;
       }
+      newCategoryId = editingCategory.id;
     } else {
       // Insert
-      const { error: insertError } = await supabase
+      const { data: insertedData, error: insertError } = await supabase
         .from('expense_categories')
-        .insert(categoryData);
+        .insert(categoryData)
+        .select('id')
+        .single();
 
       if (insertError) {
         setError(insertError.message);
         return;
       }
+      newCategoryId = insertedData?.id || null;
+    }
+
+    await loadCategories();
+
+    // If opened from transaction modal, select the new category and return to transaction modal
+    if (showTransactionModal && newCategoryId) {
+      setTransactionCategory(newCategoryId);
     }
 
     closeCategoryModal();
-    await loadCategories();
   };
 
   // Delete category
@@ -754,6 +796,7 @@ export default function ExpenseTrackerTab() {
         transactionCategory={transactionCategory}
         transactionDescription={transactionDescription}
         transactionDate={transactionDate}
+        transactionTime={transactionTime}
         categories={categories}
         error={error}
         onClose={closeTransactionModal}
@@ -762,8 +805,22 @@ export default function ExpenseTrackerTab() {
         onCategoryChange={setTransactionCategory}
         onDescriptionChange={setTransactionDescription}
         onDateChange={setTransactionDate}
+        onTimeChange={setTransactionTime}
         onSave={handleSaveTransaction}
+        onCreateCategory={() => {
+          setCategoryModalFromTransaction(true);
+          setShowTransactionModal(false);
+          openCategoryModal();
+        }}
       />
+
+      {/* Success Notification */}
+      {successMessage && (
+        <SuccessNotification
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)}
+        />
+      )}
 
       {/* Category Modal */}
       <CategoryModal
